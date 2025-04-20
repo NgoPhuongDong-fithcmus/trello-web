@@ -1,6 +1,5 @@
 import * as React from 'react'
-import { Button, Menu, MenuItem, Box, Divider, ListItemText, ListItemIcon, Avatar, Tooltip, IconButton } from '@mui/material'
-import Check from '@mui/icons-material/Check'
+import { Menu, MenuItem, Box, Divider, ListItemIcon, Avatar, Tooltip, IconButton } from '@mui/material'
 import { Logout, PersonAdd, Settings } from '@mui/icons-material'
 
 function Profiles() {
