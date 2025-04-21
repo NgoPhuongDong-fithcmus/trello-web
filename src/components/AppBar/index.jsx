@@ -10,16 +10,18 @@ import Templates from './Menu/Templates'
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Profiles from './Menu/Profiles'
+import AddToPhotosIcon from '@mui/icons-material/AddToPhotos'
 function AppBar() {
   return (
     <div>
-      <Box px={2} sx={{
+      <Box sx={{
         width: '100%',
         height: (theme) => theme.trello.appBarHeight,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 2,
+        paddingX: 2,
         overflowX: 'auto'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -34,7 +36,7 @@ function AppBar() {
             <Recent/>
             <Starred/>
             <Templates/>
-            <Button variant="outlined">Create</Button>
+            <Button variant="outlined" startIcon={<AddToPhotosIcon/>}>Create</Button>
           </Box>
 
 

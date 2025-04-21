@@ -67,7 +67,7 @@ const theme = extendTheme({
             '.MuiOutlinedInput-notchedOutline': {
               borderColor: theme.palette.primary.main
             },
-            // cái này để cho nó không bị đậm viền quá, vì khi dùng MUI thì nó hơi đậm so với những components khác
+            // cái này để cho nó không bị đậm viền quá, vì khi dùng MUI thì nó hơi đậm so với những components khác và nhớ cú pháp của nó phải có dấu cách 
             '& filedset': {
               borderWidth: '1px !important'
             }
