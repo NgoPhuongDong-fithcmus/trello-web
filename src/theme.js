@@ -1,5 +1,5 @@
 import { experimental_extendTheme as extendTheme } from '@mui/material/styles'
-import { pink, purple } from '@mui/material/colors'
+// import { pink, purple } from '@mui/material/colors'
 
 // Create a theme instance.
 const theme = extendTheme({
@@ -8,20 +8,20 @@ const theme = extendTheme({
     boardBarHeight: '60px'
   },
   colorSchemes: {
-    light: {
-      palette: {
-        primary: {
-          main: '#007AC2'
-        }
-      }
-    },
-    dark: {
-      palette: {
-        primary: {
-          main: purple[400]
-        }
-      }
-    }
+    // light: {
+    //   palette: {
+    //     primary: {
+    //       main: '#007AC2'
+    //     }
+    //   }
+    // },
+    // dark: {
+    //   palette: {
+    //     primary: {
+    //       main: purple[400]
+    //     }
+    //   }
+    // }
   },
   components: {
     CssBaseline: {
@@ -32,10 +32,10 @@ const theme = extendTheme({
             height: '8px'
           },
           '*::-webkit-scrollbar-thumb': {
-            backgroundColor: '#ecf0f1'
+            backgroundColor: '#dcdde1'
           },
           '*::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: '#00b894'
+            backgroundColor: 'white'
           }
         }
       }
@@ -43,36 +43,44 @@ const theme = extendTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none'
+          textTransform: 'none',
+          borderWidth: '0.5px',
+          '&:hover': { borderWidth: '0.5px' }
         }
       }
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: {
           fontSize: '0.875rem',
-          color: theme.palette.primary.main
-        })
+          color: 'white'
+        }
       }
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: {
           fontSize: '0.875rem',
-          color: theme.palette.primary.main,
-          '.MuiOutlinedInput-notchedOutline': {
-            borderColor: theme.palette.primary.main
+          // color: 'white',
+          // '.MuiOutlinedInput-notchedOutline': {
+          //   borderColor: 'white'
+          // },
+          // ':hover': {
+          //   '.MuiOutlinedInput-notchedOutline': {
+          //     borderColor: 'white'
+          //   }
+          // },
+          // cái này để cho nó không bị đậm viền quá, vì khi dùng MUI thì nó hơi đậm so với những components khác và nhớ cú pháp của nó phải có dấu cách
+          '& fieldset': {
+            borderWidth: '0.5px !important'
           },
-          ':hover': {
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: theme.palette.primary.main
-            },
-            // cái này để cho nó không bị đậm viền quá, vì khi dùng MUI thì nó hơi đậm so với những components khác và nhớ cú pháp của nó phải có dấu cách 
-            '& filedset': {
-              borderWidth: '1px !important'
-            }
+          '&:hover fieldset': {
+            borderWidth: '2px !important'
+          },
+          '&.Mui-focused fieldset': {
+            borderWidth: '2px !important'
           }
-        })
+        }
       }
     }
   }
