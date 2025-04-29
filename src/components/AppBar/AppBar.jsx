@@ -1,5 +1,5 @@
 import { Badge, Box, Button, InputAdornment, TextField, Tooltip, Typography } from '@mui/material'
-import SelectMode from '../ModeSelect'
+import SelectMode from '../ModeSelect/ModeSelect'
 import AppsIcon from '@mui/icons-material/Apps'
 import SvgIcon from '@mui/material/SvgIcon'
 import { ReactComponent as TrelloIcon } from '~/assets/trello.svg'
@@ -82,7 +82,7 @@ function AppBar() {
                 </InputAdornment>
               ),
               endAdornment: (
-                <InputAdornment>
+                <InputAdornment position='end'>
                   <CloseIcon
                     fontSize='small'
                     sx={{
