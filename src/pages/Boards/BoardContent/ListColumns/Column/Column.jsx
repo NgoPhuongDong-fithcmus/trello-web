@@ -4,8 +4,10 @@ import AddCardIcon from '@mui/icons-material/AddCard'
 import { Cloud, ContentCopy, ContentCut, ContentPaste, DragHandle, ExpandMore } from '@mui/icons-material'
 import { Box, Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material'
 import ListCards from './ListCards/ListCards'
+import { mapOrder } from '~/utils/sorts'
 
-function Column() {
+function Column({ column }) {
+  const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id' )
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
@@ -40,7 +42,7 @@ function Column() {
             cursor: 'pointer'
           }}
           >
-            Column Title
+            {column?.title}
           </Typography>
           <Box>
             <Tooltip title='dropdown'>
@@ -110,7 +112,7 @@ function Column() {
           </Box>
         </Box>
         {/*Box column list card */}
-        <ListCards/>
+        <ListCards cards={orderedCards}/>
         {/*Box column footer */}
         <Box
           sx={{
