@@ -5,9 +5,24 @@ import { Cloud, ContentCopy, ContentCut, ContentPaste, DragHandle, ExpandMore } 
 import { Box, Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material'
 import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 function Column({ column }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: column?._id,
+    data: { ...column }
+  })
+  const dndKitColumnStyles = {
+    touchAction: 'none',
+    // Nếu sử dụng Transform thì sẽ bị biến dạng
+    // https://github.com/clauderic/dnd-kit/issues/117
+    transform: CSS.Translate.toString(transform), // Transform thì column sẽ bị biến dạng, còn Translate thì không
+    transition
+  }
+
   const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id' )
+
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const handleClick = (event) => {
@@ -19,16 +34,21 @@ function Column({ column }) {
   return (
     <Box>
       {/* Box column 1 */}
-      <Box sx={{
-        minWidth: '300px',
-        maxWidth: '300px',
-        backgroundColor: (theme) => (theme.palette.mode == 'dark' ? '#333643' : '#ebecf0'),
-        ml: 2,
-        borderRadius: '6px',
-        height: 'fit-content',
-        maxHeight: (theme) => `calc(${theme.trello.boardContentHeight} - ${theme.spacing(5)}})`,
-        marginBottom: '10px'
-      }}>
+      <Box
+        ref={setNodeRef}
+        style={dndKitColumnStyles}
+        { ...attributes }
+        { ...listeners }
+        sx={{
+          minWidth: '300px',
+          maxWidth: '300px',
+          backgroundColor: (theme) => (theme.palette.mode == 'dark' ? '#333643' : '#ebecf0'),
+          ml: 2,
+          borderRadius: '6px',
+          height: 'fit-content',
+          maxHeight: (theme) => `calc(${theme.trello.boardContentHeight} - ${theme.spacing(5)}})`,
+          marginBottom: '10px'
+        }}>
         {/*Box column header */}
         <Box sx={{
           height: (theme) => theme.trello.columnHeaderHeight,
