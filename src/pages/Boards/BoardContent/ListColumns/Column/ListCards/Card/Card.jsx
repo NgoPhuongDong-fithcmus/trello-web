@@ -4,7 +4,6 @@ import AttachmentIcon from '@mui/icons-material/Attachment'
 import { Button, Card as MuiCard, CardActions, CardContent, CardMedia, Typography } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Opacity } from '@mui/icons-material'
 function Card({ card }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card?._id,

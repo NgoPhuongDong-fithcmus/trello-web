@@ -10,7 +10,6 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: '',
   CARD: ''
 }
-
 function BoardContent({ board }) {
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event, fix trường hợp click bị gọi event
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -34,6 +33,18 @@ function BoardContent({ board }) {
     setactiveDragItemId(event?.active?.id)
     setactiveDragItemType(event?.active?.data?.current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.COLUMN : ACTIVE_DRAG_ITEM_TYPE.CARD)
     setactiveDragItemData(event?.active?.data?.current)
+  }
+
+  const handleDragOver = (event) => {
+
+    if (ACTIVE_DRAG_ITEM_TYPE.COLUMN === activeDragItemType) {
+      return
+    }
+
+    const { active, over } = event
+
+    if (!over) return
+
   }
 
   const handleDragEnd = (event) => {
@@ -68,7 +79,7 @@ function BoardContent({ board }) {
     })
   }
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} sensors={sensors}>
+    <DndContext onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} sensors={sensors}>
       <Box sx={{
         backgroundColor: (theme) => (theme.palette.mode == 'dark' ? '#2c3e50' : '#1976d2'),
         width: '100%',
