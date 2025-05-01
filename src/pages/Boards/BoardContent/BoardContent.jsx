@@ -31,12 +31,12 @@ function BoardContent({ board }) {
 
   const handleDragStart = (event) => {
     setactiveDragItemId(event?.active?.id)
-    setactiveDragItemType(event?.active?.data?.current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.COLUMN : ACTIVE_DRAG_ITEM_TYPE.CARD)
+    setactiveDragItemType(event?.active?.data?.current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN)
     setactiveDragItemData(event?.active?.data?.current)
   }
 
   const handleDragOver = (event) => {
-
+    console.log('handleDragOver:', event)
     if (ACTIVE_DRAG_ITEM_TYPE.COLUMN === activeDragItemType) {
       return
     }
@@ -88,7 +88,7 @@ function BoardContent({ board }) {
       }}>
         <ListColumns columns={orderedColumns}/>
         <DragOverlay dropAnimation={dropAnimation}>
-          {(!activeDragItemType && null)}
+          {!activeDragItemType && null}
           {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}/>}
           {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) && <Card card={activeDragItemData}/>}
         </DragOverlay>
