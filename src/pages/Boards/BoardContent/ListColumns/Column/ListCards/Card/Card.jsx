@@ -4,10 +4,9 @@ import AttachmentIcon from '@mui/icons-material/Attachment'
 import { Button, Card as MuiCard, CardActions, CardContent, CardMedia, Typography } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Opacity } from '@mui/icons-material'
 function Card({ card }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: card?._id,
+    id: card._id,
     data: { ...card }
   })
   const dndKitCardStyles = {
@@ -16,7 +15,8 @@ function Card({ card }) {
     // https://github.com/clauderic/dnd-kit/issues/117
     transform: CSS.Translate.toString(transform), // Transform thì column sẽ bị biến dạng, còn Translate thì không
     transition,
-    opacity: isDragging ? 0.5 : undefined
+    opacity: isDragging ? 0.5 : undefined,
+    border: '1px solid transparent'
   }
 
   const showCartActions = () => {
