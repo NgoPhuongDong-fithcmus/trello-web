@@ -1,8 +1,21 @@
 import { Box } from '@mui/material'
 import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
-import { DndContext, useSensor, useSensors, MouseSensor, TouchSensor, DragOverlay, defaultDropAnimationSideEffects, closestCorners } from '@dnd-kit/core'
-import { useEffect, useState } from 'react'
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  closestCorners,
+  pointerWithin,
+  // rectIntersection,
+  // closestCenter,
+  getFirstCollision
+} from '@dnd-kit/core'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
@@ -28,6 +41,9 @@ function BoardContent({ board }) {
   const [activeDragItemType, setactiveDragItemType] = useState(null)
   const [activeDragItemData, setactiveDragItemData] = useState(null)
   const [oldColumnWhenDragging, setOldColumnWhenDragging] = useState(null)
+
+  // Điểm va chạm cuối cùng trước lúc thả
+  const lastOverId = useRef(null)
 
   useEffect(() => {
     setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
@@ -97,7 +113,6 @@ function BoardContent({ board }) {
   }
 
   const handleDragOver = (event) => {
-    // console.log('handleDragOver', event)
 
     // Nếu đang kéo thả column thì không cần xử lý gì cả
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
@@ -208,8 +223,48 @@ function BoardContent({ board }) {
       }
     })
   }
+
+  const collisionDetectionStrategy = useCallback( (args) => {
+    // Trường hợp kéo thả column thì dùng thuật toán closetCorners là chuẩn nhất
+    if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      return closestCorners({ ...args })
+    }
+
+    // Tìm các điểm va chạm với con trỏ chuột, trả về mảng các điểm va chạm
+    const pointerIntersections = pointerWithin(args)
+
+    // Khi kéo thả card có media (có ảnh) thì pointerIntersections sẽ trả về mảng rỗng nên là sẽ bị bug flickering nên phải thêm lệnh này
+    if (!pointerIntersections?.length) return
+
+
+    // Thuật toán phát hiện va chạm sẽ trả về một mảng các điểm va chạm với con trỏ chuột =>>>>> !!!!!! nó cũng giống pointerIntersections nhưng mà không cần bước này nữa
+    // const intersections = pointerIntersections?.length > 0 ? pointerIntersections : rectIntersection(args)
+
+    let overId = getFirstCollision(pointerIntersections, 'id')
+
+    if (overId) {
+
+      const checkIntersectionColumn = orderedColumns.find(c => c._id === overId)
+      if (checkIntersectionColumn) {
+        overId = closestCorners({
+          ...args,
+          droppableContainers: args.droppableContainers.filter( (container) => {
+            return container.id !== overId && ( checkIntersectionColumn?.cardOrderIds?.includes(container.id))
+          })
+        })[0]?.id
+      }
+
+      lastOverId.current = overId
+      return [{ id: overId }]
+    }
+
+    // Nếu overId là null thì trả về mảng rỗng - tránh bug crash trang
+    return lastOverId.current ? [{ id: lastOverId.current }] : []
+
+  }, [activeDragItemType, orderedColumns])
+
   return (
-    <DndContext sensors={sensors} closestCorners={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} >
+    <DndContext sensors={sensors} collisionDetection={collisionDetectionStrategy} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} >
       <Box sx={{
         backgroundColor: (theme) => (theme.palette.mode == 'dark' ? '#2c3e50' : '#1976d2'),
         width: '100%',
