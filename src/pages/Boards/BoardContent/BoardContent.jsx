@@ -1,7 +1,20 @@
 import { Box } from '@mui/material'
 import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
-import { DndContext, useSensor, useSensors, MouseSensor, TouchSensor, DragOverlay, defaultDropAnimationSideEffects, closestCorners, pointerWithin, rectIntersection, getFirstCollision, closestCenter } from '@dnd-kit/core'
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  closestCorners,
+  pointerWithin,
+  // rectIntersection,
+  // closestCenter,
+  getFirstCollision
+} from '@dnd-kit/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
@@ -217,19 +230,23 @@ function BoardContent({ board }) {
       return closestCorners({ ...args })
     }
 
-    // Tìm các điểm va chạm với con trỏ chuột
+    // Tìm các điểm va chạm với con trỏ chuột, trả về mảng các điểm va chạm
     const pointerIntersections = pointerWithin(args)
 
-    // Thuật toán phát hiện va chạm sẽ trả về một mảng các điểm va chạm với con trỏ chuột
-    const intersections = pointerIntersections.length > 0 ? pointerIntersections : rectIntersection(args)
+    // Khi kéo thả card có media (có ảnh) thì pointerIntersections sẽ trả về mảng rỗng nên là sẽ bị bug flickering nên phải thêm lệnh này
+    if (!pointerIntersections?.length) return
 
-    let overId = getFirstCollision(intersections, 'id')
+
+    // Thuật toán phát hiện va chạm sẽ trả về một mảng các điểm va chạm với con trỏ chuột =>>>>> !!!!!! nó cũng giống pointerIntersections nhưng mà không cần bước này nữa
+    // const intersections = pointerIntersections?.length > 0 ? pointerIntersections : rectIntersection(args)
+
+    let overId = getFirstCollision(pointerIntersections, 'id')
 
     if (overId) {
 
       const checkIntersectionColumn = orderedColumns.find(c => c._id === overId)
       if (checkIntersectionColumn) {
-        overId = closestCenter({
+        overId = closestCorners({
           ...args,
           droppableContainers: args.droppableContainers.filter( (container) => {
             return container.id !== overId && ( checkIntersectionColumn?.cardOrderIds?.includes(container.id))
