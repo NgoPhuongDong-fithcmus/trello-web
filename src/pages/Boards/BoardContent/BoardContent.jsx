@@ -19,7 +19,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
+import { generatePlaceHolderCard } from '~/utils/formatters'
+
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
@@ -76,6 +78,7 @@ function BoardContent({ board }) {
       const nextActiveColumn = nextColumns.find(c => c._id === activeColumn._id)
       const nextOverColumn = nextColumns.find(c => c._id === overColumn._id)
 
+      // nextActiveColumn là column đang kéo thả (column cũ)
       if (nextActiveColumn) {
         // Tìm index của card đang kéo thả trong column đang kéo thả
         const activeCardIndex = nextActiveColumn.cards.findIndex(card => card._id === activeDraggingCardId)
@@ -84,13 +87,22 @@ function BoardContent({ board }) {
           nextActiveColumn.cards = nextActiveColumn.cards.toSpliced(activeCardIndex, 1)
         }
 
+        // Thêm PlaceholderCard vào nếu column rỗng: bị kéo hết card đi, không còn card nào
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlaceHolderCard(nextActiveColumn)]
+        }
+
         // Cập nhật lại cardOrderIds của column đang kéo thả
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
 
+      // nextOverColumn là column đang thả (column mới)
       if (nextOverColumn) {
         // Nếu tìm thấy thì thêm nó vào column đang thả
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, activeDraggingCardData)
+
+        // Nếu column đang thả có card thì xóa PlaceholderCard đi
+        nextOverColumn.cards = nextOverColumn.cards.filter((card) => !card?.FE_PlaceholerCard)
 
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
