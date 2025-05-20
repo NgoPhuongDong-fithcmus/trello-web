@@ -2,13 +2,27 @@ import { useState } from 'react'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import AddCardIcon from '@mui/icons-material/AddCard'
 import { Cloud, ContentCopy, ContentCut, ContentPaste, DragHandle, ExpandMore } from '@mui/icons-material'
-import { Box, Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
 import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import CloseIcon from '@mui/icons-material/Close'
 
 function Column({ column }) {
+
+
+  const [openNewCardForm, setOpenNewCardForm] = useState(false)
+  const toggleOpenNewCardForm = () => setOpenNewCardForm(!openNewCardForm)
+
+  const [newCardTitle, setNewCardTitle] = useState('')
+
+  const addNewCard = () => {
+    toggleOpenNewCardForm()
+    setNewCardTitle('')
+  }
+
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column?._id,
     data: { ...column }
@@ -139,17 +153,73 @@ function Column({ column }) {
           <Box
             sx={{
               height: (theme) => theme.trello.columnFooterHeight,
-              p: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
+              p: 2
             }}>
-            <Button startIcon={<AddCardIcon/>}>
-              Add new cart
-            </Button>
-            <Tooltip title='Drag to move'>
-              <DragHandle sx={{ cursor: 'pointer' }}/>
-            </Tooltip>
+            {!openNewCardForm
+              ?<Box sx={{ height: '100%', display:'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Button onClick={toggleOpenNewCardForm} startIcon={<AddCardIcon/>}>
+                  Add new cart
+                </Button>
+                <Tooltip title='Drag to move'>
+                  <DragHandle sx={{ cursor: 'pointer' }}/>
+                </Tooltip>
+              </Box>
+              :
+              <Box sx={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <TextField
+                  label="Enter Column Title"
+                  type="text"
+                  size='small'
+                  variant='outlined'
+                  autoFocus
+                  value={newCardTitle}
+                  onChange={(e) => setNewCardTitle(e.target.value)}
+                  sx={{
+                    '& label': { color: '#007AC2' },
+                    '& input': { color: '#007AC2' },
+                    '& label.Mui-focused': { color: '#007AC2' },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#007AC2'
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#007AC2'
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#007AC2'
+                      }
+                    }
+                  }}
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Button
+                    onClick={addNewCard}
+                    variant='contained'
+                    color='success'
+                    size='small'
+                    sx={{
+                      boxShadow: 'none',
+                      border: '0.5px solid'
+                    }}
+                  >
+                    Add
+                  </Button>
+                  <CloseIcon
+                    fontSize='small'
+                    sx={{
+                      color: '#007AC2',
+                      cursor: 'pointer'
+                    }}
+                    onClick={toggleOpenNewCardForm}
+                  />
+                </Box>
+              </Box>
+            }
           </Box>
         </Box>
       </Box>
