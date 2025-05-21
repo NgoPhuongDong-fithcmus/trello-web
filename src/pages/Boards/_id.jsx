@@ -6,7 +6,7 @@ import AppBar from '../../components/AppBar/AppBar'
 import { generatePlaceHolderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI } from '~/apis'
+import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi } from '~/apis'
 
 // Board Detail
 function Board() {
@@ -67,11 +67,23 @@ function Board() {
     //end cap nhat state board
   }
 
+  // Xử lí kéo thả column và cập nhật api
+  const moveColumnsUpdateAPI = async (dndOrderedColumns) => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+    const newBoard = { ...board }
+    newBoard.columns= dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
+    setBoard(newBoard)
+
+    // Gọi api để update Board
+    await updateBoardDetailApi(newBoard._id, { columnOrderIds: newBoard.columnOrderIds })
+  }
+
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar/>
       <BoardBar board={ board }/>
-      <BoardContent board={ board } createNewColumn={createNewColumn} createNewCard={createNewCard}/>
+      <BoardContent board={ board } createNewColumn={createNewColumn} createNewCard={createNewCard} moveColumnsUpdateAPI={moveColumnsUpdateAPI}/>
     </Container>
   )
 }

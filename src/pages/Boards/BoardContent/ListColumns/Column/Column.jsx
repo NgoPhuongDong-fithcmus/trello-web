@@ -47,7 +47,7 @@ function Column({ column, createNewCard }) {
     // https://github.com/clauderic/dnd-kit/issues/117
     transform: CSS.Translate.toString(transform), // Transform thì column sẽ bị biến dạng, còn Translate thì không
     transition,
-    // chiều cao phải luôn là 100% vì nếu không sẽ bị lỗi lúc kéo column ngắn qua một cái column dài thì phải kéo ở khu vực giữa rất khó chịu, 
+    // chiều cao phải luôn là 100% vì nếu không sẽ bị lỗi lúc kéo column ngắn qua một cái column dài thì phải kéo ở khu vực giữa rất khó chịu,
     // lưu ý: phải kết hợp với {...listeners} nằm ở giữa Box chứ không phải ở div nằm ngoài cùng để tránh trường hợp kéo ở vùng xanh ngoài
     height: '100%',
     opacity: isDragging ? 0.5 : undefined

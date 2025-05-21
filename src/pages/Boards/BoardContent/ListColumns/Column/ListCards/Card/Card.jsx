@@ -32,8 +32,7 @@ function Card({ card }) {
         display: card?.FE_PlaceholerCard ? 'none' : 'block',
         border: '1px solid transparent',
         '&:hover': {
-          borderColor: (theme) =>
-            (theme.vars || theme).palette.primary?.main || '#007AC2'
+          borderColor: '#007AC2'
         }
 
       }}
@@ -41,7 +40,7 @@ function Card({ card }) {
       {card?.cover &&
         <CardMedia sx={{ height: 140 }} image={card?.cover}/>
       }
-      <CardContent sx={{ p: 1.5, '&;last-child': { p: 1.5 } }}>
+      <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
         <Typography>{card?.title}</Typography>
       </CardContent>
       {showCartActions() &&

@@ -28,7 +28,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
-function BoardContent({ board, createNewColumn, createNewCard }) {
+function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdateAPI }) {
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event, fix trường hợp click bị gọi event
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
@@ -217,6 +217,10 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
 
         // dndOrderedColumnsIds để sau này cập nhật lại db thật
         // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+
+        // Hoàn thiện kéo thả column và cập nhật api
+        moveColumnsUpdateAPI(dndOrderedColumns)
+
         // Cập nhật lại data column sau khi đã kéo thả
         setOrderedColumns(dndOrderedColumns)
       }
