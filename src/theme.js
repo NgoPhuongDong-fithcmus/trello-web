@@ -16,20 +16,20 @@ const theme = extendTheme({
     columnFooterHeight: COLUMN_FOOTER_HEIGHT
   },
   colorSchemes: {
-    // light: {
-    //   palette: {
-    //     primary: {
-    //       main: '#007AC2'
-    //     }
-    //   }
-    // },
-    // dark: {
-    //   palette: {
-    //     primary: {
-    //       main: purple[400]
-    //     }
-    //   }
-    // }
+    light: {
+      palette: {
+        primary: {
+          main: '#007AC2'
+        }
+      }
+    },
+    dark: {
+      palette: {
+        primary: {
+          main: '#2c3e50'
+        }
+      }
+    }
   },
   components: {
     CssBaseline: {

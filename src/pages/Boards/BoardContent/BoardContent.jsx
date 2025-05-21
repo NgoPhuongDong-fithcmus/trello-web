@@ -5,8 +5,8 @@ import {
   DndContext,
   useSensor,
   useSensors,
-  MouseSensor,
-  TouchSensor,
+  // MouseSensor,
+  // TouchSensor,
   DragOverlay,
   defaultDropAnimationSideEffects,
   closestCorners,
@@ -15,16 +15,20 @@ import {
   // closestCenter,
   getFirstCollision
 } from '@dnd-kit/core'
+import { MouseSensor, TouchSensor } from '~/customLibraries/DndKitSensors'
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
+import { generatePlaceHolderCard } from '~/utils/formatters'
+
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
-function BoardContent({ board }) {
+function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdateAPI }) {
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event, fix trường hợp click bị gọi event
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
@@ -76,6 +80,7 @@ function BoardContent({ board }) {
       const nextActiveColumn = nextColumns.find(c => c._id === activeColumn._id)
       const nextOverColumn = nextColumns.find(c => c._id === overColumn._id)
 
+      // nextActiveColumn là column đang kéo thả (column cũ)
       if (nextActiveColumn) {
         // Tìm index của card đang kéo thả trong column đang kéo thả
         const activeCardIndex = nextActiveColumn.cards.findIndex(card => card._id === activeDraggingCardId)
@@ -84,13 +89,22 @@ function BoardContent({ board }) {
           nextActiveColumn.cards = nextActiveColumn.cards.toSpliced(activeCardIndex, 1)
         }
 
+        // Thêm PlaceholderCard vào nếu column rỗng: bị kéo hết card đi, không còn card nào
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlaceHolderCard(nextActiveColumn)]
+        }
+
         // Cập nhật lại cardOrderIds của column đang kéo thả
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
 
+      // nextOverColumn là column đang thả (column mới)
       if (nextOverColumn) {
         // Nếu tìm thấy thì thêm nó vào column đang thả
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, activeDraggingCardData)
+
+        // Nếu column đang thả có card thì xóa PlaceholderCard đi
+        nextOverColumn.cards = nextOverColumn.cards.filter((card) => !card?.FE_PlaceholerCard)
 
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
@@ -203,6 +217,10 @@ function BoardContent({ board }) {
 
         // dndOrderedColumnsIds để sau này cập nhật lại db thật
         // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+
+        // Hoàn thiện kéo thả column và cập nhật api
+        moveColumnsUpdateAPI(dndOrderedColumns)
+
         // Cập nhật lại data column sau khi đã kéo thả
         setOrderedColumns(dndOrderedColumns)
       }
@@ -271,7 +289,7 @@ function BoardContent({ board }) {
         height: (theme) => theme.trello.boardContentHeight,
         p: '10px 0'
       }}>
-        <ListColumns columns={orderedColumns}/>
+        <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard}/>
         <DragOverlay dropAnimation={dropAnimation}>
           {!activeDragItemType && null}
           {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}/>}
