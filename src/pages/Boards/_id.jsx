@@ -6,7 +6,7 @@ import AppBar from '../../components/AppBar/AppBar'
 import { generatePlaceHolderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi } from '~/apis'
+import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi } from '~/apis'
 
 // Board Detail
 function Board() {
@@ -68,7 +68,7 @@ function Board() {
   }
 
   // Xử lí kéo thả column và cập nhật api
-  const moveColumnsUpdateAPI = async (dndOrderedColumns) => {
+  const moveColumnsUpdateAPI = (dndOrderedColumns) => {
     const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
     const newBoard = { ...board }
     newBoard.columns= dndOrderedColumns
@@ -76,14 +76,34 @@ function Board() {
     setBoard(newBoard)
 
     // Gọi api để update Board
-    await updateBoardDetailApi(newBoard._id, { columnOrderIds: newBoard.columnOrderIds })
+    updateBoardDetailApi(newBoard._id, { columnOrderIds: newBoard.columnOrderIds })
+  }
+
+
+  const moveCardsInSameColumn = (dndOrderedCards, dndOrderedCardIds, columnId) => {
+    const newBoard = { ...board }
+    const columnUpdateCards = newBoard.columns.find(column => column._id === columnId)
+
+    if (columnUpdateCards) {
+      columnUpdateCards.cards = dndOrderedCards
+      columnUpdateCards.cardOrderIds = dndOrderedCardIds
+    }
+    setBoard(newBoard)
+
+    // Gọi API để update column
+    updateColumnDetailApi(columnId, { cardOrderIds: dndOrderedCardIds })
   }
 
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar/>
       <BoardBar board={ board }/>
-      <BoardContent board={ board } createNewColumn={createNewColumn} createNewCard={createNewCard} moveColumnsUpdateAPI={moveColumnsUpdateAPI}/>
+      <BoardContent board={ board }
+        createNewColumn={createNewColumn}
+        createNewCard={createNewCard}
+        moveColumnsUpdateAPI={moveColumnsUpdateAPI}
+        moveCardsInSameColumn={moveCardsInSameColumn}
+      />
     </Container>
   )
 }
