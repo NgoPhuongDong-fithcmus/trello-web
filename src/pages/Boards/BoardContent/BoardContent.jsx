@@ -49,6 +49,7 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
   // Điểm va chạm cuối cùng trước lúc thả
   const lastOverId = useRef(null)
 
+  // Columns đã được sắp xếp ở component cha cao nhất rồi (fix bug kéo thả các cards lần đầu trong cùng column)
   useEffect(() => {
     setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   }, [board])

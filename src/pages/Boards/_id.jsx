@@ -1,4 +1,4 @@
-import { Container } from '@mui/material'
+import { Box, CircularProgress, Container, Typography } from '@mui/material'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 import AppBar from '../../components/AppBar/AppBar'
@@ -7,6 +7,7 @@ import { generatePlaceHolderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
 import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi } from '~/apis'
+import { mapOrder } from '~/utils/sorts'
 
 // Board Detail
 function Board() {
@@ -17,11 +18,19 @@ function Board() {
     const boardId = '682c0919afc67a30e3ed89d1'
     fetchBoardDetailApi(boardId)
       .then((board) => {
-        // xu li keo tha vao column rong moi tao de khoi can f5 trang web
+
+        board.columns = mapOrder(board?.columns, board.columnOrderIds, '_id')
+
+
         board.columns.forEach(column => {
+        // xu li keo tha vao column rong moi tao de khoi can f5 trang web
           if (isEmpty(column.cards)) {
             column.cards = [generatePlaceHolderCard(column)]
             column.cardOrderIds = [generatePlaceHolderCard(column)._id]
+          }
+          else {
+            // Sắp xếp thứ tự cards ở đây luôn trước khi đưa xuống các component con (fix bug quan trọng khi kéo thả cards trong cùng column lần đầu)
+            column.cards = mapOrder(column?.cards, column?.cardOrderIds, '_id' )
           }
         })
         // end xu li keo tha vao column rong moi tao de khoi can f5 trang web
@@ -92,6 +101,23 @@ function Board() {
 
     // Gọi API để update column
     updateColumnDetailApi(columnId, { cardOrderIds: dndOrderedCardIds })
+  }
+
+  if (!board) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+      >
+        <CircularProgress size={60} thickness={4} />
+        <Typography variant="h6" mt={2}>
+          Loading, Please waiting...
+        </Typography>
+      </Box>
+    )
   }
 
   return (

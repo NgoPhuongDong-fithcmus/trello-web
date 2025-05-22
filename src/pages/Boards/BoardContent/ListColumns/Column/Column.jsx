@@ -53,6 +53,7 @@ function Column({ column, createNewCard }) {
     opacity: isDragging ? 0.5 : undefined
   }
 
+  // Cards đã được sắp xếp ở component cha cao nhất rồi
   const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id' )
 
   const [anchorEl, setAnchorEl] = useState(null)
