@@ -6,7 +6,7 @@ import AppBar from '../../components/AppBar/AppBar'
 import { generatePlaceHolderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi } from '~/apis'
+import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi, moveCardsToDifferentColumnApi } from '~/apis'
 import { mapOrder } from '~/utils/sorts'
 
 // Board Detail
@@ -88,7 +88,7 @@ function Board() {
     updateBoardDetailApi(newBoard._id, { columnOrderIds: newBoard.columnOrderIds })
   }
 
-
+  // Khi chuyển card trong cùng column: Gọi API để cập nhật cardOrderIds của column chứa nó
   const moveCardsInSameColumn = (dndOrderedCards, dndOrderedCardIds, columnId) => {
     const newBoard = { ...board }
     const columnUpdateCards = newBoard.columns.find(column => column._id === columnId)
@@ -101,6 +101,28 @@ function Board() {
 
     // Gọi API để update column
     updateColumnDetailApi(columnId, { cardOrderIds: dndOrderedCardIds })
+  }
+
+  // Khi chuyển card sang column khác:
+  // + Cập nhật cardOrderIds của column ban đầu chứa nó
+  // + Cập nhật cardOrderIds của column sẽ chứa nó
+  // + Cập nhật lại columnId của card đã kéo
+  // => Gọi API để xử lí
+  const moveCardsToDifferentColumn = (currentCardId, prevColumnId, nextColumnId, dndOrderedColumns) => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+    const newBoard = { ...board }
+    newBoard.columns= dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
+    setBoard(newBoard)
+
+    // Gọi API để xử lí phía BE
+    moveCardsToDifferentColumnApi({
+      currentCardId,
+      prevColumnId,
+      prevCardOrderIds: dndOrderedColumns.find(c => c._id === prevColumnId)?.cardOrderIds,
+      nextColumnId,
+      nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)?.cardOrderIds
+    })
   }
 
   if (!board) {
@@ -129,6 +151,7 @@ function Board() {
         createNewCard={createNewCard}
         moveColumnsUpdateAPI={moveColumnsUpdateAPI}
         moveCardsInSameColumn={moveCardsInSameColumn}
+        moveCardsToDifferentColumn={moveCardsToDifferentColumn}
       />
     </Container>
   )
