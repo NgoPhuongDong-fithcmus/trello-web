@@ -6,8 +6,9 @@ import AppBar from '../../components/AppBar/AppBar'
 import { generatePlaceHolderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi, moveCardsToDifferentColumnApi } from '~/apis'
+import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi, moveCardsToDifferentColumnApi, deleteColumnDetailApi } from '~/apis'
 import { mapOrder } from '~/utils/sorts'
+import { toast } from 'react-toastify'
 
 // Board Detail
 function Board() {
@@ -69,9 +70,17 @@ function Board() {
     const columnUpdateCards = newBoard.columns.find(column => column._id === createdCard.columnId)
 
     if (columnUpdateCards) {
-      columnUpdateCards.cards.push(createdCard)
-      columnUpdateCards.cardOrderIds.push(createdCard._id)
+      if (columnUpdateCards.cards.some(card => card.FE_PlaceholerCard)) {
+        columnUpdateCards.cards = [createdCard]
+        columnUpdateCards.cardOrderIds = [createdCard._id]
+      }
+      else {
+        columnUpdateCards.cards.push(createdCard)
+        columnUpdateCards.cardOrderIds.push(createdCard._id)
+      }
+
     }
+
     setBoard(newBoard)
     //end cap nhat state board
   }
@@ -115,13 +124,30 @@ function Board() {
     newBoard.columnOrderIds = dndOrderedColumnsIds
     setBoard(newBoard)
 
+    // fix bug khi khi kéo hết card của 1 column thì khi kéo lại sẽ không gọi được api vì thẻ PlaceholderCard nên nó sẽ đẩy dữ liệu cho backend bị sai. Vì vậy phải xóa PlaceholderCard trước khi gửi cho BE
+    let prevCardOrderIds = dndOrderedColumns.find(c => c._id === prevColumnId)?.cardOrderIds
+    if (prevCardOrderIds[0].includes('placeholder-card')) {
+      prevCardOrderIds = []
+    }
     // Gọi API để xử lí phía BE
     moveCardsToDifferentColumnApi({
       currentCardId,
       prevColumnId,
-      prevCardOrderIds: dndOrderedColumns.find(c => c._id === prevColumnId)?.cardOrderIds,
+      prevCardOrderIds,
       nextColumnId,
       nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)?.cardOrderIds
+    })
+  }
+
+  const deleteColumn = (columnId) => {
+    // cập nhật state board
+    const newBoard = { ...board }
+    newBoard.columns= newBoard.columns.filter(c => c._id !== columnId)
+    newBoard.columnOrderIds = newBoard.columnOrderIds.filter(_id => _id !== columnId)
+    setBoard(newBoard)
+    // Gọi API để xử lí BE
+    deleteColumnDetailApi(columnId).then(res => {
+      toast.success(res?.result)
     })
   }
 
@@ -146,12 +172,15 @@ function Board() {
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar/>
       <BoardBar board={ board }/>
-      <BoardContent board={ board }
+      <BoardContent
+        board={ board }
+
         createNewColumn={createNewColumn}
         createNewCard={createNewCard}
         moveColumnsUpdateAPI={moveColumnsUpdateAPI}
         moveCardsInSameColumn={moveCardsInSameColumn}
         moveCardsToDifferentColumn={moveCardsToDifferentColumn}
+        deleteColumn={deleteColumn}
       />
     </Container>
   )
