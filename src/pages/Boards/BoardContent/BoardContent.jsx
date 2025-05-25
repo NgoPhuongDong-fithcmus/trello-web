@@ -28,7 +28,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
-function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdateAPI }) {
+function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdateAPI, moveCardsInSameColumn, moveCardsToDifferentColumn, deleteColumn }) {
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event, fix trường hợp click bị gọi event
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
@@ -49,6 +49,7 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
   // Điểm va chạm cuối cùng trước lúc thả
   const lastOverId = useRef(null)
 
+  // Columns đã được sắp xếp ở component cha cao nhất rồi (fix bug kéo thả các cards lần đầu trong cùng column)
   useEffect(() => {
     setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   }, [board])
@@ -65,13 +66,14 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
     over,
     activeColumn,
     activeDraggingCardId,
-    activeDraggingCardData
+    activeDraggingCardData,
+    triggerFrom
   ) => {
     setOrderedColumns(prevColumns => {
       const overCardIndex = overColumn?.cards?.findIndex(card => card._id === overCardId)
 
       let newCardIndex
-      const isBelowOverItem = active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height
+      const isBelowOverItem = active?.rect?.current?.translated && active.rect.current.translated.top > over.rect.top + over.rect.height
       const modifier = isBelowOverItem ? 1 : 0
       newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : over?.cards?.length + 1
 
@@ -107,6 +109,10 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
         nextOverColumn.cards = nextOverColumn.cards.filter((card) => !card?.FE_PlaceholerCard)
 
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
+      }
+
+      if (triggerFrom === 'handleDragEnd') {
+        moveCardsToDifferentColumn(activeDraggingCardId, oldColumnWhenDragging._id, nextOverColumn._id, nextColumns)
       }
 
       // ở đây phải return vì nếu không thì sẽ bị lỗi không cập nhật lại state
@@ -155,14 +161,13 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
     // Xử lí logic ở đây chỉ khi kéo card qua 2 column khác nhau, còn nếu kéo thả trong cùng 1 column thì không cần xử lý gì cả
     // Vì đây đang là đoạn xử lí lúc kéo handleOver còn xử lí lúc kéo xong thì ở đoạn handleDragEnd
     if (activeColumn._id !== overColumn._id) {
-      moveCardBetweenColumns(overColumn, overCardId, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
+      moveCardBetweenColumns(overColumn, overCardId, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData, 'handleDragOver')
     }
 
   }
 
   const handleDragEnd = (event) => {
     const { active, over } = event
-
     if (!active || !over) return
 
     // Xử lí kéo cards
@@ -181,30 +186,30 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
       // Nếu không tồn tại 1 trong 2 column thì không cần xử lý gì cả
       if (!activeColumn || !overColumn) return
 
+      // Hai column khác nhau
       if (oldColumnWhenDragging._id !== overColumn._id) {
-        // console.log('Keo card qua column khac nhau')
-        moveCardBetweenColumns(overColumn, overCardId, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
+        moveCardBetweenColumns(overColumn, overCardId, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData, 'handleDragEnd')
       }
+      // Trong cùng column
       else {
         const oldCardIndex = oldColumnWhenDragging?.cards.findIndex(card => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards.findIndex(card => card._id === overCardId)
-        const dndOrderedColumns = arrayMove(oldColumnWhenDragging?.cards, oldCardIndex, newCardIndex)
+        const dndOrderedCards = arrayMove(oldColumnWhenDragging?.cards, oldCardIndex, newCardIndex)
+        const dndOrderedCardIds = dndOrderedCards.map(card => card._id)
 
         setOrderedColumns(prevColumns => {
           const nextColumns = cloneDeep(prevColumns)
-
           const targetColumn = nextColumns.find(column => column._id === oldColumnWhenDragging._id)
 
           if (targetColumn) {
-            targetColumn.cards = dndOrderedColumns
-            targetColumn.cardOrderIds = dndOrderedColumns.map(card => card._id)
+            targetColumn.cards = dndOrderedCards
+            targetColumn.cardOrderIds = dndOrderedCardIds
           }
-
           return nextColumns
-        } )
+        })
 
+        moveCardsInSameColumn(dndOrderedCards, dndOrderedCardIds, oldColumnWhenDragging._id)
       }
-
     }
 
     // Xử lí kéo columns trong cùng boardContent tương tự như kéo thả cards trong cùng column
@@ -218,11 +223,12 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
         // dndOrderedColumnsIds để sau này cập nhật lại db thật
         // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
 
-        // Hoàn thiện kéo thả column và cập nhật api
-        moveColumnsUpdateAPI(dndOrderedColumns)
 
         // Cập nhật lại data column sau khi đã kéo thả
         setOrderedColumns(dndOrderedColumns)
+
+        // Hoàn thiện kéo thả column và cập nhật api
+        moveColumnsUpdateAPI(dndOrderedColumns)
       }
     }
 
@@ -289,7 +295,7 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumnsUpdate
         height: (theme) => theme.trello.boardContentHeight,
         p: '10px 0'
       }}>
-        <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard}/>
+        <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} deleteColumn={deleteColumn}/>
         <DragOverlay dropAnimation={dropAnimation}>
           {!activeDragItemType && null}
           {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData}/>}

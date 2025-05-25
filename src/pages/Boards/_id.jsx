@@ -1,4 +1,4 @@
-import { Container } from '@mui/material'
+import { Box, CircularProgress, Container, Typography } from '@mui/material'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 import AppBar from '../../components/AppBar/AppBar'
@@ -6,7 +6,9 @@ import AppBar from '../../components/AppBar/AppBar'
 import { generatePlaceHolderCard } from '~/utils/formatters'
 import { isEmpty } from 'lodash'
 import { useEffect, useState } from 'react'
-import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi } from '~/apis'
+import { fetchBoardDetailApi, createNewColumnAPI, createNewCardAPI, updateBoardDetailApi, updateColumnDetailApi, moveCardsToDifferentColumnApi, deleteColumnDetailApi } from '~/apis'
+import { mapOrder } from '~/utils/sorts'
+import { toast } from 'react-toastify'
 
 // Board Detail
 function Board() {
@@ -17,11 +19,19 @@ function Board() {
     const boardId = '682c0919afc67a30e3ed89d1'
     fetchBoardDetailApi(boardId)
       .then((board) => {
-        // xu li keo tha vao column rong moi tao de khoi can f5 trang web
+
+        board.columns = mapOrder(board?.columns, board.columnOrderIds, '_id')
+
+
         board.columns.forEach(column => {
+        // xu li keo tha vao column rong moi tao de khoi can f5 trang web
           if (isEmpty(column.cards)) {
             column.cards = [generatePlaceHolderCard(column)]
             column.cardOrderIds = [generatePlaceHolderCard(column)._id]
+          }
+          else {
+            // Sắp xếp thứ tự cards ở đây luôn trước khi đưa xuống các component con (fix bug quan trọng khi kéo thả cards trong cùng column lần đầu)
+            column.cards = mapOrder(column?.cards, column?.cardOrderIds, '_id' )
           }
         })
         // end xu li keo tha vao column rong moi tao de khoi can f5 trang web
@@ -60,15 +70,23 @@ function Board() {
     const columnUpdateCards = newBoard.columns.find(column => column._id === createdCard.columnId)
 
     if (columnUpdateCards) {
-      columnUpdateCards.cards.push(createdCard)
-      columnUpdateCards.cardOrderIds.push(createdCard._id)
+      if (columnUpdateCards.cards.some(card => card.FE_PlaceholerCard)) {
+        columnUpdateCards.cards = [createdCard]
+        columnUpdateCards.cardOrderIds = [createdCard._id]
+      }
+      else {
+        columnUpdateCards.cards.push(createdCard)
+        columnUpdateCards.cardOrderIds.push(createdCard._id)
+      }
+
     }
+
     setBoard(newBoard)
     //end cap nhat state board
   }
 
   // Xử lí kéo thả column và cập nhật api
-  const moveColumnsUpdateAPI = async (dndOrderedColumns) => {
+  const moveColumnsUpdateAPI = (dndOrderedColumns) => {
     const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
     const newBoard = { ...board }
     newBoard.columns= dndOrderedColumns
@@ -76,14 +94,94 @@ function Board() {
     setBoard(newBoard)
 
     // Gọi api để update Board
-    await updateBoardDetailApi(newBoard._id, { columnOrderIds: newBoard.columnOrderIds })
+    updateBoardDetailApi(newBoard._id, { columnOrderIds: newBoard.columnOrderIds })
+  }
+
+  // Khi chuyển card trong cùng column: Gọi API để cập nhật cardOrderIds của column chứa nó
+  const moveCardsInSameColumn = (dndOrderedCards, dndOrderedCardIds, columnId) => {
+    const newBoard = { ...board }
+    const columnUpdateCards = newBoard.columns.find(column => column._id === columnId)
+
+    if (columnUpdateCards) {
+      columnUpdateCards.cards = dndOrderedCards
+      columnUpdateCards.cardOrderIds = dndOrderedCardIds
+    }
+    setBoard(newBoard)
+
+    // Gọi API để update column
+    updateColumnDetailApi(columnId, { cardOrderIds: dndOrderedCardIds })
+  }
+
+  // Khi chuyển card sang column khác:
+  // + Cập nhật cardOrderIds của column ban đầu chứa nó
+  // + Cập nhật cardOrderIds của column sẽ chứa nó
+  // + Cập nhật lại columnId của card đã kéo
+  // => Gọi API để xử lí
+  const moveCardsToDifferentColumn = (currentCardId, prevColumnId, nextColumnId, dndOrderedColumns) => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
+    const newBoard = { ...board }
+    newBoard.columns= dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
+    setBoard(newBoard)
+
+    // fix bug khi khi kéo hết card của 1 column thì khi kéo lại sẽ không gọi được api vì thẻ PlaceholderCard nên nó sẽ đẩy dữ liệu cho backend bị sai. Vì vậy phải xóa PlaceholderCard trước khi gửi cho BE
+    let prevCardOrderIds = dndOrderedColumns.find(c => c._id === prevColumnId)?.cardOrderIds
+    if (prevCardOrderIds[0].includes('placeholder-card')) {
+      prevCardOrderIds = []
+    }
+    // Gọi API để xử lí phía BE
+    moveCardsToDifferentColumnApi({
+      currentCardId,
+      prevColumnId,
+      prevCardOrderIds,
+      nextColumnId,
+      nextCardOrderIds: dndOrderedColumns.find(c => c._id === nextColumnId)?.cardOrderIds
+    })
+  }
+
+  const deleteColumn = (columnId) => {
+    // cập nhật state board
+    const newBoard = { ...board }
+    newBoard.columns= newBoard.columns.filter(c => c._id !== columnId)
+    newBoard.columnOrderIds = newBoard.columnOrderIds.filter(_id => _id !== columnId)
+    setBoard(newBoard)
+    // Gọi API để xử lí BE
+    deleteColumnDetailApi(columnId).then(res => {
+      toast.success(res?.result)
+    })
+  }
+
+  if (!board) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="100vh"
+      >
+        <CircularProgress size={60} thickness={4} />
+        <Typography variant="h6" mt={2}>
+          Loading, Please waiting...
+        </Typography>
+      </Box>
+    )
   }
 
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar/>
       <BoardBar board={ board }/>
-      <BoardContent board={ board } createNewColumn={createNewColumn} createNewCard={createNewCard} moveColumnsUpdateAPI={moveColumnsUpdateAPI}/>
+      <BoardContent
+        board={ board }
+
+        createNewColumn={createNewColumn}
+        createNewCard={createNewCard}
+        moveColumnsUpdateAPI={moveColumnsUpdateAPI}
+        moveCardsInSameColumn={moveCardsInSameColumn}
+        moveCardsToDifferentColumn={moveCardsToDifferentColumn}
+        deleteColumn={deleteColumn}
+      />
     </Container>
   )
 }
