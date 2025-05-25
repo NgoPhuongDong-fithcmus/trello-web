@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_ROOT } from '~/utils/constants'
-import axios from 'axios'
 import { mapOrder } from '~/utils/sorts'
 import { isEmpty } from 'lodash'
 import { generatePlaceHolderCard } from '~/utils/formatters'
+import authorizedAxiosInstance from '~/utils/authorizeAxios'
 
 // Khởi tạo giá trị của một Slice trong redux
 const initialState = {
@@ -14,7 +14,7 @@ const initialState = {
 export const fetchBoardDetailApi = createAsyncThunk(
   'activeBoard/fetchBoardDetailApi',
   async (boardId) => {
-    const request = await axios.get(`${API_ROOT}/v1/boards/${boardId}`)
+    const request = await authorizedAxiosInstance.get(`${API_ROOT}/v1/boards/${boardId}`)
 
     return request.data
   }

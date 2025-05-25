@@ -251,7 +251,7 @@ function Column({ column }) {
             {!openNewCardForm
               ?<Box sx={{ height: '100%', display:'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Button onClick={toggleOpenNewCardForm} startIcon={<AddCardIcon/>}>
-                  Add new cart
+                  Add new card
                 </Button>
                 <Tooltip title='Drag to move'>
                   <DragHandle sx={{ cursor: 'pointer' }}/>
@@ -292,6 +292,7 @@ function Column({ column }) {
                 />
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Button
+                    className='interceptor-loading'
                     onClick={addNewCard}
                     variant='contained'
                     color='success'
