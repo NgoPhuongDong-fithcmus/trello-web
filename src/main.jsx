@@ -7,16 +7,20 @@ import theme from './theme.js'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
+import { BrowserRouter } from 'react-router-dom'
+
 // Cau hinh redux store
 import { Provider } from 'react-redux'
 import { store } from '~/redux/store.js'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <Provider store={store}>
-    <CssVarsProvider theme={theme}>
-      <CssBaseline />
-      <App />
-      <ToastContainer/>
-    </CssVarsProvider>
-  </Provider>
+  <BrowserRouter basename='/'>
+    <Provider store={store}>
+      <CssVarsProvider theme={theme}>
+        <CssBaseline />
+        <App />
+        <ToastContainer/>
+      </CssVarsProvider>
+    </Provider>
+  </BrowserRouter>
 )

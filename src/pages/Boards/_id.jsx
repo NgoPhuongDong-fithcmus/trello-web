@@ -12,14 +12,15 @@ import {
 } from '~/apis'
 import { fetchBoardDetailApi, updateCurrentActiveBoard, selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
 
 // Board Detail
 function Board() {
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
-
+  const { boardId } = useParams()
   useEffect(() => {
-    const boardId = '682c0919afc67a30e3ed89d1'
+    // const boardId = '682c0919afc67a30e3ed89d1'
     dispatch(fetchBoardDetailApi(boardId))
     // fetchBoardDetailApi(boardId).then((board) => {
 
@@ -40,7 +41,7 @@ function Board() {
     //   // end xu li keo tha vao column rong moi tao de khoi can f5 trang web
     //   setBoard(board)
     // })
-  }, [dispatch])
+  }, [dispatch, boardId])
 
   // gọi api tạo mới column và cập nhật dữ liệu state board
   // const createNewColumn = async (newColumnData) => {
