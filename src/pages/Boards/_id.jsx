@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Container, Typography } from '@mui/material'
+import { Container } from '@mui/material'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 import AppBar from '../../components/AppBar/AppBar'
@@ -13,6 +13,7 @@ import {
 import { fetchBoardDetailApi, updateCurrentActiveBoard, selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
+import PageLoading from '~/components/Loading/PageLoading'
 
 // Board Detail
 function Board() {
@@ -166,18 +167,7 @@ function Board() {
 
   if (!board) {
     return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
-      >
-        <CircularProgress size={60} thickness={4} />
-        <Typography variant="h6" mt={2}>
-          Loading, Please waiting...
-        </Typography>
-      </Box>
+      <PageLoading content='Loading, Please waiting...' />
     )
   }
 

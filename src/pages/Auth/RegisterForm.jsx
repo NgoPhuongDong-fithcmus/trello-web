@@ -1,5 +1,5 @@
 // TrungQuanDev: https://youtube.com/@trungquandev
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
@@ -13,13 +13,30 @@ import Zoom from '@mui/material/Zoom'
 import { useForm } from 'react-hook-form'
 import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { registerUserAPI } from '~/apis'
+import { toast } from 'react-toastify'
 
 function RegisterForm() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm()
 
+  const navigate = useNavigate()
+
   const submitRegister = (data) => {
-    // eslint-disable-next-line no-console
-    console.log('🚀 ~ submitRegister ~ data:', data)
+    const { email, password } = data
+    toast.promise(
+      registerUserAPI({ email, password }),
+      {
+        pending: 'Registering your account...',
+        success: 'Register successfully, please check your email to verify your account!',
+        error: {
+          render({ data }) {
+            return data.response?.data?.message || 'Something went wrong, please try again!'
+          }
+        }
+      }
+    ).then(user => {
+      navigate(`/login?registeredEmail=${user.email}`)
+    })
   }
   return (
     <form onSubmit={handleSubmit(submitRegister)}>
