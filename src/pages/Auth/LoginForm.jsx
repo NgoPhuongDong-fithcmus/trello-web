@@ -1,5 +1,5 @@
 // TrungQuanDev: https://youtube.com/@trungquandev
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
@@ -14,8 +14,13 @@ import Alert from '@mui/material/Alert'
 import { useForm } from 'react-hook-form'
 import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { useDispatch } from 'react-redux'
+import { toast } from 'react-toastify'
+import { loginUserAPI } from '~/redux/user/userSlice'
 function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const [searchParams] = useSearchParams()
   const verifiedEmail = searchParams.get('verifiedEmail')
@@ -23,8 +28,23 @@ function LoginForm() {
 
 
   const submitLogIn = (data) => {
-    // eslint-disable-next-line no-console
-    console.log('🚀 ~ submitLogIn ~ data:', data)
+    const { email, password } = data
+    toast.promise(
+      dispatch(loginUserAPI({ email, password })),
+      {
+        pending: 'Logging in...',
+        error: {
+          render({ data }) {
+            return data.response?.data?.message || 'Something went wrong, please try again!'
+          }
+        }
+      }
+    ).then(res => {
+      const user = res.payload
+      if (user) {
+        navigate('/')
+      }
+    })
   }
 
   return (
