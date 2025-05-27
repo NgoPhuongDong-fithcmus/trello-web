@@ -13,14 +13,20 @@ import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { store } from '~/redux/store.js'
 
+// Cau hinh redux-persist
+import { persistStore } from 'redux-persist'
+import { PersistGate } from 'redux-persist/integration/react'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter basename='/'>
     <Provider store={store}>
-      <CssVarsProvider theme={theme}>
-        <CssBaseline />
-        <App />
-        <ToastContainer/>
-      </CssVarsProvider>
+      <PersistGate loading={null} persistor={persistStore(store)}>
+        <CssVarsProvider theme={theme}>
+          <CssBaseline />
+          <App />
+          <ToastContainer/>
+        </CssVarsProvider>
+      </PersistGate>
     </Provider>
   </BrowserRouter>
 )
