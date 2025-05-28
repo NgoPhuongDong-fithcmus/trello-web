@@ -7,14 +7,14 @@ import Button from '@mui/material/Button'
 import PasswordIcon from '@mui/icons-material/Password'
 import LockResetIcon from '@mui/icons-material/LockReset'
 import LockIcon from '@mui/icons-material/Lock'
-import LogoutIcon from '@mui/icons-material/Logout'
+import changePasswordIcon from '../../assets/changePassword.png'
 
 import { FIELD_REQUIRED_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { useDispatch } from 'react-redux'
-import { loginUserAPI, logoutUserAPI, updateUserAPI } from '~/redux/user/userSlice'
+import { logoutUserAPI, updateUserAPI } from '~/redux/user/userSlice'
 import Swal from 'sweetalert2'
 
 function SecurityTab() {
@@ -25,10 +25,14 @@ function SecurityTab() {
   // Ôn lại: https://www.npmjs.com/package/material-ui-confirm
   const submitChangePassword = (data) => {
     Swal.fire({
-      title: 'Change Password!',
+      title: 'Are you sure?',
       text: 'You have to login again after successfully changing your password. Continue?',
-      icon: 'warning',
+      imageUrl: changePasswordIcon,
+      imageWidth: 50,
+      imageHeight: 50,
       showCancelButton: true,
+      confirmButtonColor: '#1976d2',
+      cancelButtonColor: '#9e9e9e',
       confirmButtonText: 'Confirm',
       cancelButtonText: 'Cancel'
     }).then((result) => {
