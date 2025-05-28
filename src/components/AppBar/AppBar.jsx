@@ -14,6 +14,7 @@ import AddToPhotosIcon from '@mui/icons-material/AddToPhotos'
 import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 function AppBar() {
   const [searchValue, setSearchValue] = useState('')
   return (
@@ -35,17 +36,19 @@ function AppBar() {
               color: 'white'
             }}
           />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <SvgIcon component={TrelloIcon} inheritViewBox sx={(theme) => ({
-              color: theme.palette.mode === 'dark'
-                ? '#ecf0f1' : '#001f3f',
-              '& path': {
-                fill: 'white'
-              },
-              fontSize: 'small'
-            })} />
-            <Typography variant='span' sx={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }} >Trello</Typography>
-          </Box>
+          <Link to='/' style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <SvgIcon component={TrelloIcon} inheritViewBox sx={(theme) => ({
+                color: theme.palette.mode === 'dark'
+                  ? '#ecf0f1' : '#001f3f',
+                '& path': {
+                  fill: 'white'
+                },
+                fontSize: 'small'
+              })} />
+              <Typography variant='span' sx={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white' }} >Trello</Typography>
+            </Box>
+          </Link>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
             <Workspaces/>

@@ -47,6 +47,14 @@ export const logoutUserAPI = createAsyncThunk(
   }
 )
 
+export const updateUserAPI = createAsyncThunk(
+  'user/updateUserAPI',
+  async (data) => {
+    const request = await authorizedAxiosInstance.put(`${API_ROOT}/v1/users/update`, data)
+    return request.data
+  }
+)
+
 export const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -61,6 +69,19 @@ export const userSlice = createSlice({
     // Khi gọi API logout thành công thì sẽ xóa currentUser trong state kết hợp với ProtectedRoute sẽ tự động chuyển hướng về trang login
     builder.addCase(logoutUserAPI.fulfilled, (state) => {
       state.currentUser = null
+    })
+    builder.addCase(updateUserAPI.fulfilled, (state, action) => {
+      const updatedUser = action.payload
+
+      // Cập nhật currentUser trong state với thông tin mới
+      if (state.currentUser) {
+        state.currentUser = {
+          ...state.currentUser,
+          ...updatedUser
+        }
+      } else {
+        state.currentUser = updatedUser
+      }
     })
   }
 })

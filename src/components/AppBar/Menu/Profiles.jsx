@@ -6,6 +6,7 @@ import { selectCurrentUser, logoutUserAPI } from '~/redux/user/userSlice'
 import { useDispatch } from 'react-redux'
 import Swal from 'sweetalert2'
 import logoutIcon from '../../../assets/logout.png'
+import { Link } from 'react-router-dom'
 
 function Profiles() {
 
@@ -64,14 +65,16 @@ function Profiles() {
           'aria-labelledby': 'basic-button-profile'
         }}
       >
-        <MenuItem sx={{
-          '&:hover': {
-            backgroundColor: 'transparent',
-            color: 'primary.main'
-          }
-        }} >
-          <Avatar sx={{ width: '28px', height: '28px', mr: 2 }} alt={currentUser?.name} src={currentUser?.avatar} /> {currentUser?.displayName || 'Profile' }
-        </MenuItem>
+        <Link to="/settings/account" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <MenuItem sx={{
+            '&:hover': {
+              backgroundColor: 'transparent',
+              color: 'primary.main'
+            }
+          }} >
+            <Avatar sx={{ width: '28px', height: '28px', mr: 2 }} alt={currentUser?.name} src={currentUser?.avatar} /> {currentUser?.displayName || 'Profile' }
+          </MenuItem>
+        </Link>
         <Divider />
         <MenuItem >
           <ListItemIcon>

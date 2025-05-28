@@ -2,6 +2,7 @@ import Board from './pages/Boards/_id'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import NotFound from './pages/404Page/NotFound'
 import Auth from './pages/Auth/Auth'
+import Settings from './pages/Settings/Settings'
 import AccountVerification from './pages/Auth/AccountVerification'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
@@ -22,6 +23,8 @@ function App() {
       }/>
       <Route element={<ProtectedRoute user={currentUser}/>}>
         <Route path='/boards/:boardId' element={<Board/>}/>
+        <Route path='/settings/account' element={<Settings/>}/>
+        <Route path='/settings/security' element={<Settings/>}/>
       </Route>
 
       <Route path='/login' element={<Auth/>}/>
