@@ -17,6 +17,10 @@ import { store } from '~/redux/store.js'
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/integration/react'
 
+// Cấu hình kĩ thuật inject store
+import { injectStore } from '~/utils/authorizeAxios.js'
+injectStore(store)
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter basename='/'>
     <Provider store={store}>
