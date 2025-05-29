@@ -100,6 +100,33 @@ function AccountTab() {
     }
 
     // Gọi API...
+    toast.promise(
+      dispatch(updateUserAPI(reqData)),
+      {
+        pending: 'Updating...',
+        error: {
+          render({ data }) {
+            return data.response?.data?.message || 'Something went wrong, please try again!'
+          }
+        }
+      }
+    ).then(res => {
+      const user = res.payload
+      if (user) {
+        toast.success('Avatar has been updated successfully!', {
+          theme: 'colored',
+          position: 'top-right',
+          autoClose: 800,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined
+        })
+      }
+      // Lưu ý, dù có lỗi hay thành công thì cũng phải clear giá trị của input file để tránh trường hợp người dùng upload lại cùng một file
+      e.target.value = ''
+    })
   }
 
   return (

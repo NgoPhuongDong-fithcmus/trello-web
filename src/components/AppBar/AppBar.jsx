@@ -31,11 +31,14 @@ function AppBar() {
         backgroundColor: (theme) => (theme.palette.mode == 'dark' ? '#2c3e50' : '#007AC2')
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <AppsIcon
-            sx={{
-              color: 'white'
-            }}
-          />
+          <Link to='/boards'>
+            <AppsIcon
+              sx={{
+                color: 'white',
+                verticalAlign: 'middle'
+              }}
+            />
+          </Link>
           <Link to='/' style={{ textDecoration: 'none', color: 'inherit' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <SvgIcon component={TrelloIcon} inheritViewBox sx={(theme) => ({
