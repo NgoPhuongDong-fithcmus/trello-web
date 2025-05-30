@@ -8,6 +8,12 @@ import { API_ROOT } from '~/utils/constants'
 //   return response.data
 // }
 
+export const createNewBoardAPI = async (newBoardData) => {
+  const response = await authorizedAxiosInstance.post(`${API_ROOT}/v1/boards`, newBoardData)
+  toast.success('Board created successfully!', { theme: 'colored' })
+  return response.data
+}
+
 export const updateBoardDetailApi = async (boardId, updateData) => {
   const response = await authorizedAxiosInstance.put(`${API_ROOT}/v1/boards/${boardId}`, updateData)
 

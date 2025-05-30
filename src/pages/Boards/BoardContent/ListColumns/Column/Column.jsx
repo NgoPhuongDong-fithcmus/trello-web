@@ -10,10 +10,11 @@ import { CSS } from '@dnd-kit/utilities'
 import CloseIcon from '@mui/icons-material/Close'
 import { toast } from 'react-toastify'
 import Swal from 'sweetalert2'
-import { createNewCardAPI, deleteColumnDetailApi } from '~/apis'
+import { createNewCardAPI, deleteColumnDetailApi, updateColumnDetailApi } from '~/apis'
 import { cloneDeep } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 
 
 function Column({ column }) {
@@ -124,6 +125,25 @@ function Column({ column }) {
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  const onUpdateColumnTitle = (newTitle) => {
+    updateColumnDetailApi(column._id, { title: newTitle })
+      .then(res => {
+        if (res?.result) {
+          // Cập nhật lại state board
+          const newBoard = { ...board }
+          const columnUpdate = newBoard.columns.find(c => c._id === column._id)
+          if (columnUpdate) {
+            columnUpdate.title = newTitle
+          }
+          dispatch(updateCurrentActiveBoard(newBoard))
+        }
+      })
+      .catch(err => {
+        toast.error(err?.message || 'Something went wrong!')
+      })
+  }
+
   return (
     // ở đây phải bọc div vì chiều cao của column khi kéo thả sẽ có bug kiểu flickering
     <div ref={setNodeRef} style={dndKitColumnStyles} { ...attributes } >
@@ -148,13 +168,19 @@ function Column({ column }) {
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <Typography sx={{
+            {/* <Typography sx={{
+              fontSize: '1rem',
               fontWeight: 'bold',
               cursor: 'pointer'
             }}
             >
               {column?.title}
-            </Typography>
+            </Typography> */}
+            <ToggleFocusInput
+              value={column?.title}
+              onChangedValue={onUpdateColumnTitle}
+              data-no-dnd='true'
+            />
             <Box>
               <Tooltip title='dropdown'>
                 <ExpandMore
