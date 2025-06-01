@@ -1,10 +1,14 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import {
+  createSlice
+  // createAsyncThunk
+} from '@reduxjs/toolkit'
 // import { API_ROOT } from '~/utils/constants'
 
 // import authorizedAxiosInstance from '~/utils/authorizeAxios'
 
 const initialState = {
-  currentActiveCard: null
+  currentActiveCard: null,
+  isShowModalActiveCard: false
 }
 
 export const activeCardSlice = createSlice({
@@ -12,7 +16,9 @@ export const activeCardSlice = createSlice({
   initialState,
   // Nơi xử lí dữ liệu đồng bộ
   reducers: {
-
+    showModalActiveCard: (state) => {
+      state.isShowModalActiveCard = true
+    },
     updateCurrentActiveCard: (state, action) => {
       const fullCard = action.payload
 
@@ -22,18 +28,23 @@ export const activeCardSlice = createSlice({
       // Update lại dữ liệu của currentActiveCard
       state.currentActiveCard = fullCard
     },
-
-    clearCurrentActiveCard: (state) => {
+    // clear data and hide modal activeCard
+    clearAndHideCurrentActiveCard: (state) => {
       state.currentActiveCard = null
+      state.isShowModalActiveCard = false
     }
   },
   extraReducers: (builder) => {}
 })
 
-export const { updateCurrentActiveCard, clearCurrentActiveCard } = activeCardSlice.actions
+export const { updateCurrentActiveCard, clearAndHideCurrentActiveCard, showModalActiveCard } = activeCardSlice.actions
 
 export const selectCurrentActiveCard = (state) => {
   return state.activeCard.currentActiveCard
+}
+
+export const selectIsShowModalActiveCard = (state) => {
+  return state.activeCard.isShowModalActiveCard
 }
 
 export const activeCardReducer = activeCardSlice.reducer
