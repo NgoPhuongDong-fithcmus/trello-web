@@ -21,11 +21,6 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { injectStore } from '~/utils/authorizeAxios.js'
 injectStore(store)
 
-// Cấu hình socket-io phía client
-import { io } from 'socket.io-client'
-import { API_ROOT } from './utils/constants.js'
-export const socketIoInstance = io(API_ROOT)
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter basename='/'>
     <Provider store={store}>
