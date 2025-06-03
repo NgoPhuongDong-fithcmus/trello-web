@@ -7,7 +7,6 @@ import Workspaces from './Menu/Workspaces'
 import Recent from './Menu/Recent'
 import Starred from './Menu/Starred'
 import Templates from './Menu/Templates'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Profiles from './Menu/Profiles'
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos'
@@ -15,6 +14,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Notifications from './Notifications'
 function AppBar() {
   const [searchValue, setSearchValue] = useState('')
   return (
@@ -70,8 +70,6 @@ function AppBar() {
                 Create
             </Button>
           </Box>
-
-
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <TextField
@@ -120,11 +118,7 @@ function AppBar() {
             }}
           />
           <SelectMode/>
-          <Tooltip title="Notifications">
-            <Badge color="secondary" variant="dot" sx={{ cursor: 'pointer' }} >
-              <NotificationsNoneIcon sx={{ color: 'white' }}/>
-            </Badge>
-          </Tooltip>
+          <Notifications/>
           <Tooltip title="Helps">
             <Badge color="secondary" variant="dot" sx={{ cursor: 'pointer' }} >
               <HelpOutlineIcon sx={{ color: 'white' }}/>

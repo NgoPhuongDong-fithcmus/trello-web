@@ -11,6 +11,7 @@ import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE, EMAIL_RULE_MESSAGE } from '~/utils/
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { inviteUserAPI } from '~/apis'
 import { toast } from 'react-toastify'
+import { socketIoInstance } from '~/main'
 function InviteBoardUser({ boardId }) {
   /**
    * Xử lý Popover để ẩn hoặc hiện một popup nhỏ, tương tự docs để tham khảo ở đây:
@@ -27,15 +28,17 @@ function InviteBoardUser({ boardId }) {
   const { register, handleSubmit, setValue, formState: { errors } } = useForm()
   const submitInviteUserToBoard = (data) => {
     const { inviteeEmail } = data
-    console.log(data)
 
     // Gọi API để gửi lời mời người dùng vào board
-    inviteUserAPI({ inviteeEmail, boardId }).then(() => {
+    inviteUserAPI({ inviteeEmail, boardId }).then((invitation) => {
       // Hiển thị thông báo thành công
       toast.success(`Invitation sent to ${inviteeEmail}!`, { theme: 'colored' })
       // Clear thẻ input sử dụng react-hook-form bằng setValue
       setValue('inviteeEmail', null)
       setAnchorPopoverElement(null)
+
+      // Mời một người tham gia vào board thì cũng gửi/emit một sự kiện đến server (real-time)
+      socketIoInstance.emit('CLIENT_USER_INVITED_TO_BOARD', invitation)
     })
 
 

@@ -18,7 +18,8 @@ export default defineConfig({
     include: [
       '@emotion/react',
       '@emotion/styled',
-      '@mui/material/Tooltip'
+      '@mui/material/Tooltip',
+      '@mui/material/styles'
     ]
   }
 })
