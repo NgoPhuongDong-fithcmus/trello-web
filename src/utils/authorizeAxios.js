@@ -27,6 +27,7 @@ authorizedAxiosInstance.interceptors.request.use((config) => {
   return Promise.reject(error)
 })
 
+// fix refresh nhiều lần
 let refreshTokenPromise = null
 
 // Add a response interceptor: Can thiệp vào những respond API

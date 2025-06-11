@@ -73,6 +73,24 @@ export const verifyUserAPI = async (data) => {
   return response.data
 }
 
+export const verifyUserResetPasswordAPI = async (data) => {
+  const response = await authorizedAxiosInstance.put(`${API_ROOT}/v1/users/verify_resetPassword`, data)
+  toast.success('Your account has been verified successfully!', { theme: 'colored' })
+  return response.data
+}
+
+export const forgotPasswordAPI = async (data) => {
+  const response = await authorizedAxiosInstance.post(`${API_ROOT}/v1/users/forgot_password`, data)
+
+  return response.data
+}
+
+export const resetPasswordAPI = async (data) => {
+  const response = await authorizedAxiosInstance.post(`${API_ROOT}/v1/users/reset_password`, data)
+  toast.success('Your password has been reset successfully!', { theme: 'colored' })
+  return response.data
+}
+
 export const refreshTokensAPI = async () => {
   const response = await authorizedAxiosInstance.get(`${API_ROOT}/v1/users/refresh_tokens`)
   return response.data

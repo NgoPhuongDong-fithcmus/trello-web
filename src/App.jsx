@@ -7,6 +7,7 @@ import AccountVerification from './pages/Auth/AccountVerification'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import Boards from './pages/Boards'
+import AccountResetPasswordVerification from './pages/Auth/AccountResetPasswordVerification'
 
 const ProtectedRoute = ({ user }) => {
   if (!user) {
@@ -31,7 +32,10 @@ function App() {
 
       <Route path='/login' element={<Auth/>}/>
       <Route path='/register' element={<Auth/>}/>
+      <Route path='/forgot-password' element={<Auth/>}/>
+      <Route path='/reset_password' element={<Auth/>}/>
       <Route path='/account/verification' element={<AccountVerification/>}/>
+      <Route path='/account/reset-password' element={<AccountResetPasswordVerification/>}/>
 
       <Route path='*' element={<NotFound/>}/>
     </Routes>

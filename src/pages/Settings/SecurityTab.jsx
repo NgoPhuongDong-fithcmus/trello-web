@@ -26,7 +26,7 @@ function SecurityTab() {
   const submitChangePassword = (data) => {
     Swal.fire({
       title: 'Are you sure?',
-      text: 'You have to login again after successfully changing your password. Continue?',
+      text: 'Do you really want to change password? Click yes to continue?',
       imageUrl: changePasswordIcon,
       imageWidth: 50,
       imageHeight: 50,

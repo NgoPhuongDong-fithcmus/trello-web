@@ -5,12 +5,16 @@ import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
 import { useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import ForgetPasswordForm from './ForgotPasswordForm'
+import ResetPasswordForm from './ResetPasswordForm'
 
 function Auth() {
   const location = useLocation()
   // console.log(location)
   const isLogin = location.pathname === '/login'
   const isRegister = location.pathname === '/register'
+  const isForgotPassword = location.pathname === '/forgot-password'
+  const isResetPassword = location.pathname === '/reset_password'
 
   const currentUser = useSelector(selectCurrentUser)
   if (currentUser) {
@@ -33,6 +37,8 @@ function Auth() {
     }}>
       {isLogin && <LoginForm />}
       {isRegister && <RegisterForm />}
+      {isForgotPassword && <ForgetPasswordForm />}
+      {isResetPassword && <ResetPasswordForm />}
     </Box>
   )
 }

@@ -1,4 +1,3 @@
-// TrungQuanDev: https://youtube.com/@trungquandev
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -58,7 +57,7 @@ function LoginForm() {
             gap: 1
           }}>
             <Avatar sx={{ bgcolor: 'primary.main' }}><LockIcon /></Avatar>
-            <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}><TrelloIcon /></Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main', color: 'white', size: 'small' }}><TrelloIcon width={20} height={20} /></Avatar>
           </Box>
           <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', color: theme => theme.palette.grey[500] }}>
             Author: Ngô Phương Đông
@@ -132,6 +131,11 @@ function LoginForm() {
             <Typography>Is this the first time you use Trello?</Typography>
             <Link to="/register" style={{ textDecoration: 'none' }}>
               <Typography sx={{ color: 'primary.main', '&:hover': { color: '#ffbb39' } }}>Create account!</Typography>
+            </Link>
+          </Box>
+          <Box sx={{ textAlign: 'center', padding: '0 1em 1em 1em' }}>
+            <Link to="/forgot-password" style={{ textDecoration: 'none' }}>
+              <Typography sx={{ color: 'primary.main', '&:hover': { color: '#ffbb39' } }}>Forgot password?</Typography>
             </Link>
           </Box>
         </MuiCard>
