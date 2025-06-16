@@ -48,7 +48,6 @@ function AccountTab() {
 
   const submitChangeGeneralInformation = (data) => {
     const { displayName } = data
-    console.log('displayName: ', displayName)
 
     // Nếu không có sự thay đổi gì về displayname thì không làm gì cả
     if (displayName === currentUser?.displayName) return

@@ -55,6 +55,14 @@ export const updateUserAPI = createAsyncThunk(
   }
 )
 
+export const fetchUserDetailAPI = createAsyncThunk(
+  'user/fetchUserDetailAPI',
+  async (userId) => {
+    const request = await authorizedAxiosInstance.get(`${API_ROOT}/v1/users/${userId}`)
+    return request.data
+  }
+)
+
 export const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -72,6 +80,7 @@ export const userSlice = createSlice({
     })
     builder.addCase(updateUserAPI.fulfilled, (state, action) => {
       const updatedUser = action.payload
+      // console.log('updateUserAPI.fulfilled > updatedUser: ', updatedUser)
 
       // Cập nhật currentUser trong state với thông tin mới
       if (state.currentUser) {
@@ -81,6 +90,17 @@ export const userSlice = createSlice({
         }
       } else {
         state.currentUser = updatedUser
+      }
+    })
+    builder.addCase(fetchUserDetailAPI.fulfilled, (state, action) => {
+      const user = action.payload
+      if (state.currentUser) {
+        state.currentUser = {
+          ...state.currentUser,
+          ...user
+        }
+      } else {
+        state.currentUser = user
       }
     })
   }

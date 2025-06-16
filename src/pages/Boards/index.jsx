@@ -25,6 +25,11 @@ import SidebarCreateBoardModal from './create'
 import { styled } from '@mui/material/styles'
 import { fetchBoardsAPI } from '~/apis'
 import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
+import { Alert, Button } from '@mui/material'
+import Setup2FA from '~/components/Verify2FA/setup-2fa'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchUserDetailAPI, selectCurrentUser, updateUserAPI } from '~/redux/user/userSlice'
+import Require2FA from '~/components/Verify2FA/require-2fa'
 // Styles của mấy cái Sidebar item menu, anh gom lại ra đây cho gọn.
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -44,6 +49,11 @@ const SidebarItem = styled(Box)(({ theme }) => ({
 }))
 
 function Boards() {
+  const user = useSelector(selectCurrentUser)
+  // console.log('Boards > user: ', user)
+  const dispatch = useDispatch()
+  const [openSetup2FA, setOpenSetup2FA] = useState(false)
+
   // Số lượng bản ghi boards hiển thị tối đa trên 1 page tùy dự án (thường sẽ là 12 cái)
   const [boards, setBoards] = useState(null)
   // Tổng toàn bộ số lượng bản ghi boards có trong Database mà phía BE trả về để FE dùng tính toán phân trang
@@ -69,20 +79,29 @@ function Boards() {
   }
 
   useEffect(() => {
-    // Fake tạm 16 cái item thay cho boards
-    // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    // setBoards([...Array(16)].map((_, i) => i))
-    // // Fake tạm giả sử trong Database trả về có tổng 100 bản ghi boards
-    // setTotalBoards(100)
-
     // Gọi API lấy danh sách boards ở đây...
     fetchBoardsAPI(location.search)
       .then(updateDataAfterCreateBoard)
-  }, [location.search])
+    // dispatch(updateUserAPI(user.require_2fa))
+    dispatch(fetchUserDetailAPI(user._id))
+    // if (user?._id) {
+    //   dispatch(fetchUserDetailAPI(user._id))
+    // }
+  }, [location.search, user._id, dispatch])
+
 
   const refreshPageAfterCreateBoard = () => {
     fetchBoardsAPI(location.search)
       .then(updateDataAfterCreateBoard)
+  }
+
+  const handleSuccessSetup2FA = (updatedUser) => {
+    dispatch(updateUserAPI({ ...updatedUser, require_2fa: true, is_2fa_verified: true }))
+    setOpenSetup2FA(false)
+  }
+
+  const handleSuccessRequire2FA = (updatedUser) => {
+    dispatch(updateUserAPI({ ...updatedUser, is_2fa_verified: true }))
   }
 
   // Lúc chưa tồn tại boards > đang chờ gọi api thì hiện loading
@@ -117,6 +136,53 @@ function Boards() {
           </Grid>
 
           <Grid xs={12} sm={9}>
+            <Box sx={{
+              maxWidth: '1120px',
+              margin: '1em auto',
+              display: 'flex',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 1,
+              padding: '0 1em'
+            }}>
+              {/* Modal để user cài đặt 2FA */}
+              <Setup2FA
+                isOpen={openSetup2FA}
+                toggleOpen={setOpenSetup2FA}
+                user={user}
+                handleSuccessSetup2FA={handleSuccessSetup2FA}
+              />
+
+              {/* Modal yêu cầu xác thực 2FA */}
+              {/* Với điều kiện user đã bật tính năng 2FA, và user chưa xác thực 2FA ngay sau khi đăng nhập ở lần tiếp theo */}
+              {/* <Require2FA /> */}
+              {user.require_2fa && !user.is_2fa_verified && <Require2FA user={user} handleSuccessRequire2FA={handleSuccessRequire2FA}/>}
+
+              <Alert severity={`${user.require_2fa ? 'success' : 'warning'}`} sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
+                Tình trạng bảo mật tài khoản:&nbsp;
+                <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#e67e22', cursor: 'pointer' } }}>
+                  {user.require_2fa ? 'Đã Bật' : 'Chưa Bật'} xác thực 2 lớp - Two-Factor Authentication (2FA)
+                </Typography>
+              </Alert>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'end', gap: 2, mt: 1 }}>
+                {!user.require_2fa &&
+                <Button
+                  type='button'
+                  variant='contained'
+                  color='warning'
+                  size='large'
+                  sx={{ maxWidth: 'max-content' }}
+                  onClick={() => setOpenSetup2FA(true)}
+                >
+                  Enable 2FA
+                </Button>
+                }
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+            </Box>
+
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>Your boards:</Typography>
 
             {/* Trường hợp gọi API nhưng không tồn tại cái board nào trong Database trả về */}
