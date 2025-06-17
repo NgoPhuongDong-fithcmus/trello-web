@@ -5,8 +5,15 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
+import { createNewColumnAPI } from '~/apis'
+import { generatePlaceHolderCard } from '~/utils/formatters'
+import { cloneDeep } from 'lodash'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
-function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) {
+function ListColumns({ columns }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
@@ -23,7 +30,23 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) 
       title: newColumnTitle
     }
 
-    await createNewColumn(newColumnData)
+    const createdColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: board._id
+    })
+
+    // xử lí khi vừa mới tạo column thì có thể kéo thả liền
+    createdColumn.cards = [generatePlaceHolderCard(createdColumn)]
+    createdColumn.cardOrderIds = [generatePlaceHolderCard(createdColumn)._id]
+    // end xử lí khi vừa mới tạo column thì có thể kéo thả liền
+
+    // cap nhat state board
+    // const newBoard = { ...board }
+    const newBoard = cloneDeep(board)
+    newBoard.columns.push(createdColumn)
+    newBoard.columnOrderIds.push(createdColumn._id)
+    // setBoard(newBoard)
+    dispatch(updateCurrentActiveBoard(newBoard))
 
     toggleOpenNewColumnForm()
     setNewColumnTitle('')
@@ -44,7 +67,7 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) 
         overflowY: 'hidden',
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
-        {columns?.map((column) => (<Column key={column._id} column={column} createNewCard={createNewCard} deleteColumn={deleteColumn}/>))}
+        {columns?.map((column) => (<Column key={column._id} column={column}/>))}
         {!openNewColumnForm
           ? <Box onClick={toggleOpenNewColumnForm} sx={{
             minWidth: '250px',
@@ -105,6 +128,7 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumn }) 
             />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Button
+                className='interceptor-loading'
                 onClick={addNewColumn}
                 variant='contained'
                 color='success'

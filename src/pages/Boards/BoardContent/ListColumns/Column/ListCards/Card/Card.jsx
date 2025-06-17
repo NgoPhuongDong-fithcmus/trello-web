@@ -4,7 +4,20 @@ import AttachmentIcon from '@mui/icons-material/Attachment'
 import { Button, Card as MuiCard, CardActions, CardContent, CardMedia, Typography } from '@mui/material'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useDispatch } from 'react-redux'
+import { showModalActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 function Card({ card }) {
+
+  const dispatch = useDispatch()
+
+  const setActiveCard = () => {
+    // cập nhật data cho activeCard
+    dispatch(updateCurrentActiveCard(card))
+
+    // Hiển thị modal activeCard
+    dispatch(showModalActiveCard())
+  }
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
     data: { ...card }
@@ -24,6 +37,7 @@ function Card({ card }) {
   }
   return (
     <MuiCard
+      onClick={setActiveCard}
       ref={setNodeRef} style={dndKitCardStyles} { ...attributes } { ...listeners }
       sx={{
         cursor: 'pointer',

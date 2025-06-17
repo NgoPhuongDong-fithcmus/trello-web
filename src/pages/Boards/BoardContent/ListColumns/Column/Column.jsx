@@ -10,10 +10,16 @@ import { CSS } from '@dnd-kit/utilities'
 import CloseIcon from '@mui/icons-material/Close'
 import { toast } from 'react-toastify'
 import Swal from 'sweetalert2'
+import { createNewCardAPI, deleteColumnDetailApi, updateColumnDetailApi } from '~/apis'
+import { cloneDeep } from 'lodash'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 
 
-function Column({ column, createNewCard, deleteColumn }) {
-
+function Column({ column }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
 
   const [openNewCardForm, setOpenNewCardForm] = useState(false)
   const toggleOpenNewCardForm = () => setOpenNewCardForm(!openNewCardForm)
@@ -33,7 +39,31 @@ function Column({ column, createNewCard, deleteColumn }) {
       columnId: column._id
     }
 
-    await createNewCard(newCardData)
+    const createdCard = await createNewCardAPI({
+      ...newCardData,
+      boardId: board._id
+    })
+
+    // cap nhat state board
+    // const newBoard = { ...board }
+    const newBoard = cloneDeep(board)
+    const columnUpdateCards = newBoard.columns.find(column => column._id === createdCard.columnId)
+
+    if (columnUpdateCards) {
+      if (columnUpdateCards.cards.some(card => card.FE_PlaceholerCard)) {
+        columnUpdateCards.cards = [createdCard]
+        columnUpdateCards.cardOrderIds = [createdCard._id]
+      }
+      else {
+        columnUpdateCards.cards.push(createdCard)
+        columnUpdateCards.cardOrderIds.push(createdCard._id)
+      }
+
+    }
+
+    // setBoard(newBoard)
+    dispatch(updateCurrentActiveBoard(newBoard))
+    //end cap nhat state board
 
     toggleOpenNewCardForm()
     setNewCardTitle('')
@@ -51,7 +81,17 @@ function Column({ column, createNewCard, deleteColumn }) {
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteColumn(column._id)
+        // deleteColumn(column._id)
+        // cập nhật state board
+        const newBoard = { ...board }
+        newBoard.columns= newBoard.columns.filter(c => c._id !== column._id)
+        newBoard.columnOrderIds = newBoard.columnOrderIds.filter(_id => _id !== column._id)
+        // setBoard(newBoard)
+        dispatch(updateCurrentActiveBoard(newBoard))
+        // Gọi API để xử lí BE
+        deleteColumnDetailApi(column._id).then(res => {
+          toast.success(res?.result)
+        })
         Swal.fire('Deleted!', 'The column has been deleted.', 'success')
       }
     })
@@ -85,6 +125,25 @@ function Column({ column, createNewCard, deleteColumn }) {
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  const onUpdateColumnTitle = (newTitle) => {
+    updateColumnDetailApi(column._id, { title: newTitle })
+      .then(res => {
+        if (res?.result) {
+          // Cập nhật lại state board
+          const newBoard = { ...board }
+          const columnUpdate = newBoard.columns.find(c => c._id === column._id)
+          if (columnUpdate) {
+            columnUpdate.title = newTitle
+          }
+          dispatch(updateCurrentActiveBoard(newBoard))
+        }
+      })
+      .catch(err => {
+        toast.error(err?.message || 'Something went wrong!')
+      })
+  }
+
   return (
     // ở đây phải bọc div vì chiều cao của column khi kéo thả sẽ có bug kiểu flickering
     <div ref={setNodeRef} style={dndKitColumnStyles} { ...attributes } >
@@ -109,13 +168,19 @@ function Column({ column, createNewCard, deleteColumn }) {
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <Typography sx={{
+            {/* <Typography sx={{
+              fontSize: '1rem',
               fontWeight: 'bold',
               cursor: 'pointer'
             }}
             >
               {column?.title}
-            </Typography>
+            </Typography> */}
+            <ToggleFocusInput
+              value={column?.title}
+              onChangedValue={onUpdateColumnTitle}
+              data-no-dnd='true'
+            />
             <Box>
               <Tooltip title='dropdown'>
                 <ExpandMore
@@ -212,7 +277,7 @@ function Column({ column, createNewCard, deleteColumn }) {
             {!openNewCardForm
               ?<Box sx={{ height: '100%', display:'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Button onClick={toggleOpenNewCardForm} startIcon={<AddCardIcon/>}>
-                  Add new cart
+                  Add new card
                 </Button>
                 <Tooltip title='Drag to move'>
                   <DragHandle sx={{ cursor: 'pointer' }}/>
@@ -253,6 +318,7 @@ function Column({ column, createNewCard, deleteColumn }) {
                 />
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Button
+                    className='interceptor-loading'
                     onClick={addNewCard}
                     variant='contained'
                     color='success'
