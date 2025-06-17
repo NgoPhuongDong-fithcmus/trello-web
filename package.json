@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "author": "TrungQuanDev - Một Lập Trình Viên",
-  "description": "https://youtube.com/@trungquandev",
+  "author": "PhuongDongDev - Một Lập Trình Viên",
+  "description": "Tôi là một lập trình viên, tôi thích viết code và chia sẻ kiến thức.",
   "engines": {
     "node": ">=18.x"
   },
