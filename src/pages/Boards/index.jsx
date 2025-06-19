@@ -30,6 +30,7 @@ import Setup2FA from '~/components/Verify2FA/setup-2fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchUserDetailAPI, selectCurrentUser, updateUserAPI } from '~/redux/user/userSlice'
 import Require2FA from '~/components/Verify2FA/require-2fa'
+import Swal from 'sweetalert2'
 // Styles của mấy cái Sidebar item menu, anh gom lại ra đây cho gọn.
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -104,6 +105,28 @@ function Boards() {
     dispatch(updateUserAPI({ ...updatedUser, is_2fa_verified: true }))
   }
 
+  const handleDisable2FA = () => {
+    Swal.fire({
+      title: 'Bạn chắc chắn?',
+      text: 'Bạn có chắc muốn hủy xác thực hai lớp (2FA)?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Hủy 2FA',
+      cancelButtonText: 'Không'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(updateUserAPI({
+          ...user,
+          require_2fa: false,
+          is_2fa_verified: false
+        }))
+        Swal.fire('Đã hủy xác thực hai lớp (2FA)', '', 'success')
+      }
+    })
+  }
+
   // Lúc chưa tồn tại boards > đang chờ gọi api thì hiện loading
   if (!boards) {
     return <PageLoading caption="Loading..." />
@@ -166,17 +189,28 @@ function Boards() {
               </Alert>
 
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'end', gap: 2, mt: 1 }}>
-                {!user.require_2fa &&
-                <Button
-                  type='button'
-                  variant='contained'
-                  color='warning'
-                  size='large'
-                  sx={{ maxWidth: 'max-content' }}
-                  onClick={() => setOpenSetup2FA(true)}
-                >
+                {!user.require_2fa ?
+                  <Button
+                    type='button'
+                    variant='contained'
+                    color='warning'
+                    size='large'
+                    sx={{ maxWidth: 'max-content' }}
+                    onClick={() => setOpenSetup2FA(true)}
+                  >
                   Enable 2FA
-                </Button>
+                  </Button>
+                  :
+                  <Button
+                    type='button'
+                    variant='contained'
+                    color='error'
+                    size='large'
+                    sx={{ maxWidth: 'max-content' }}
+                    onClick={() => handleDisable2FA()}
+                  >
+                    Disable 2FA
+                  </Button>
                 }
               </Box>
 
