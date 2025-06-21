@@ -1,4 +1,3 @@
-// Author: TrungQuanDev | https://youtube.com/@trungquandev
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import Box from '@mui/material/Box'
@@ -86,7 +85,7 @@ function Require2FA({ user, handleSuccessRequire2FA }) {
 
           <Box>
             <Typography variant="span" sx={{ fontWeight: 'bold', fontSize: '0.9em', color: '#8395a7', '&:hover': { color: '#fdba26' } }}>
-              <a style={{ color: 'inherit', textDecoration: 'none' }} href='https://youtube.com/@trungquandev' target='_blank' rel='noreferrer'>
+              <a style={{ color: 'inherit', textDecoration: 'none' }} href='https://youtube.com' target='_blank' rel='noreferrer'>
                 PhuongDongDev - Một Lập Trình Viên
               </a>
             </Typography>
