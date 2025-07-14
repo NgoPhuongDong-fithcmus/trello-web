@@ -1,3 +1,4 @@
+
 // export const API_ROOT = 'https://trello-api-m3ay.onrender.com'
 // export const API_ROOT = 'http://localhost:8017'
 
@@ -8,6 +9,18 @@
 //   ADD: 'ADD',
 //   REMOVE: 'REMOVE'
 // }
+
+let apiRoot = ''
+
+if (process.env.NODE_ENV === 'production') {
+  apiRoot = 'https://trello-api-m3ay.onrender.com'
+}
+else {
+  apiRoot = 'http://localhost:8017'
+}
+
+export const API_ROOT = apiRoot
+
 
 let apiRoot = ''
 
