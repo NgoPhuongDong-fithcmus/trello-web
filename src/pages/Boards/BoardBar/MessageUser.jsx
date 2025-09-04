@@ -72,7 +72,6 @@ function MessageUser({ boardId }) {
   useEffect(() => {
     const handleNewMessage = (msg) => {
       setMessages((prev) => {
-        // nếu có pending message (tạm thời) thì thay bằng msg thật từ server
         const filtered = prev.filter((m) => !(m.pending && m.text === msg.text))
         return [...filtered, msg]
       })
