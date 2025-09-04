@@ -41,7 +41,7 @@ function Setup2FA({ isOpen, toggleOpen, user, handleSuccessSetup2FA }) {
     // Call API here
     setup2FA_QRCodeAPI(user._id, otpToken)
       .then((updatedUser) => {
-        console.log('handleConfirmSetup2FA > updatedUser: ', updatedUser)
+        // console.log('handleConfirmSetup2FA > updatedUser: ', updatedUser)
         toast.success('2FA setup successfully!')
         handleSuccessSetup2FA(updatedUser)
       })

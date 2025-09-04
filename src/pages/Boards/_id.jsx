@@ -112,5 +112,4 @@ function Board() {
   )
 }
 export default Board
-
 // mockData.board

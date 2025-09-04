@@ -27,6 +27,7 @@
     "@uiw/react-md-editor": "^4.0.3",
     "axios": "^1.5.1",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.13",
     "lodash": "^4.17.21",
     "material-ui-confirm": "^4.0.0",
     "moment": "^2.30.1",

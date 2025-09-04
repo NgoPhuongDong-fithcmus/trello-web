@@ -7,6 +7,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import { capitalizeFirstLetter } from '~/utils/formatters'
 import BoardUserGroup from './BoardUserGroup'
 import InviteBoardUser from './InviteBoardUser'
+import MessageUser from './MessageUser'
 
 const boardBarStyle = {
   color: 'white',
@@ -71,6 +72,7 @@ function BoardBar({ board }) {
         />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <MessageUser boardId={board?._id} />
         <InviteBoardUser boardId={board?._id} />
         <BoardUserGroup boardUsers={board?.allUsers}/>
       </Box>

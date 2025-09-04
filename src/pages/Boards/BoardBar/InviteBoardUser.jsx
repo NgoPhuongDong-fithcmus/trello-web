@@ -20,10 +20,22 @@ function InviteBoardUser({ boardId }) {
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const isOpenPopover = Boolean(anchorPopoverElement)
   const popoverId = isOpenPopover ? 'invite-board-user-popover' : undefined
-  const handleTogglePopover = (event) => {
-    if (!anchorPopoverElement) setAnchorPopoverElement(event.currentTarget)
-    else setAnchorPopoverElement(null)
+
+  /**
+   * ở đây xử lí việc đóng mở popover
+   * thay vì toggle thì tách thành 2 hàm riêng biệt để dễ quản lí tránh bị spam
+   */
+  // const handleTogglePopover = (event) => {
+  //   if (!anchorPopoverElement) setAnchorPopoverElement(event.currentTarget)
+  //   else setAnchorPopoverElement(null)
+  // }
+  const handleOpenPopover = (event) => {
+    setAnchorPopoverElement(event.currentTarget)
   }
+  const handleClosePopover = () => {
+    setAnchorPopoverElement(null)
+  }
+
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm()
   const submitInviteUserToBoard = (data) => {
@@ -49,7 +61,7 @@ function InviteBoardUser({ boardId }) {
       <Tooltip title="Invite user to this board!">
         <Button
           aria-describedby={popoverId}
-          onClick={handleTogglePopover}
+          onClick={handleOpenPopover}
           variant="outlined"
           startIcon={<PersonAddIcon />}
           sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white' } }}
@@ -63,7 +75,7 @@ function InviteBoardUser({ boardId }) {
         id={popoverId}
         open={isOpenPopover}
         anchorEl={anchorPopoverElement}
-        onClose={handleTogglePopover}
+        onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >

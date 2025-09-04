@@ -67,6 +67,11 @@ export const registerUserAPI = async (data) => {
   return response.data
 }
 
+export const resendVerificationEmailAPI = async (email) => {
+  const response = await authorizedAxiosInstance.post(`${API_ROOT}/v1/users/resend_verification`, { email })
+  return response.data
+}
+
 export const verifyUserAPI = async (data) => {
   const response = await authorizedAxiosInstance.put(`${API_ROOT}/v1/users/verify`, data)
   toast.success('Your account has been verified successfully!', { theme: 'colored' })
@@ -123,5 +128,11 @@ export const verify2faAPI = async (userId, otpToken) => {
 
 export const fetchUserDetailAPI = async (userId) => {
   const response = await authorizedAxiosInstance.get(`${API_ROOT}/v1/users/${userId}`)
+  return response.data
+}
+
+// Messages
+export const fetchMessagesAPI = async (boardId) => {
+  const response = await authorizedAxiosInstance.get(`${API_ROOT}/v1/messages/${boardId}`)
   return response.data
 }

@@ -17,12 +17,13 @@ import Alert from '@mui/material/Alert'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE, EMAIL_RULE_MESSAGE } from '~/utils/validators'
 import { toast } from 'react-toastify'
-import { forgotPasswordAPI } from '~/apis'
+import { forgotPasswordAPI, resendVerificationEmailAPI } from '~/apis'
 
 function ForgetPasswordForm() {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm()
+  const { register, handleSubmit, formState: { errors }, reset, getValues } = useForm()
   const navigate = useNavigate()
   const [success, setSuccess] = useState(false)
+  const [resend, setResend] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const submitForgotPassword = async (data) => {
@@ -42,11 +43,35 @@ function ForgetPasswordForm() {
         }
       )
       setSuccess(true)
-      reset() // reset form email nếu muốn
+      // reset(undefined, { keepValues: true })
     } catch (error) {
       // error đã được toast xử lý rồi
     } finally {
       setLoading(false)
+    }
+  }
+
+  const resendVerificationEmail = async () => {
+    setLoading(true)
+    const { email } = getValues()
+    try {
+      await toast.promise(
+        resendVerificationEmailAPI(email),
+        {
+          pending: 'Resending reset link...',
+          success: 'Reset link has been resent successfully!',
+          error: {
+            render({ data }) {
+              return data?.response?.data?.message || 'Resend link failed. Please try again!'
+            }
+          }
+        }
+      )
+    } catch (error) {
+      // error đã được toast xử lý rồi
+    } finally {
+      setLoading(false)
+      setResend(true)
     }
   }
 
@@ -66,7 +91,12 @@ function ForgetPasswordForm() {
             Author: Ngô Phương Đông
           </Box>
           <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '0 1em' }}>
-            {success && (
+            {success && resend && (
+              <Alert severity="info" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
+                Link reset password đã được gửi lại. Vui lòng kiểm tra email của bạn.
+              </Alert>
+            )}
+            {success && !resend && (
               <Alert severity="success" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
                 Yêu cầu đổi mật khẩu đã thành công.<br />Vui lòng kiểm tra email để hoàn tất đổi mật khẩu.
               </Alert>
@@ -93,6 +123,13 @@ function ForgetPasswordForm() {
               <FieldErrorAlert errors={errors} fieldName="email" />
             </Box>
           </Box>
+          {success && (
+            <Box sx={{ padding: '0 1em 0 1em', textAlign: 'right' }}>
+              <Button sx={{ margin: '0 1em 1em 1em', display: 'flex-end' }} variant="text" onClick={() => resendVerificationEmail()}>
+                Resend reset link
+              </Button>
+            </Box>
+          )}
           <CardActions sx={{ padding: '0 1em 1em 1em' }}>
             <Button
               className="interceptor-loading"
