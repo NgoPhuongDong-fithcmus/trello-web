@@ -22,7 +22,8 @@ export default defineConfig({
       '@emotion/react',
       '@emotion/styled',
       '@mui/material/Tooltip',
-      '@mui/material/styles'
+      '@mui/material/styles',
+      '@mui/material/Unstable_Grid2'
     ]
   }
 })

@@ -165,25 +165,35 @@ function MessageUser({ boardId }) {
                       {isMe ? 'Me' : m.sender?.username || 'Unknown'}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'gray' }}>
-                      {dayjs(m.createdAt).format('HH:mm')}
+                      {dayjs(m.createdAt).format('hh:mm A')}
                     </Typography>
+
                   </Box>
 
 
-                  <Box
-                    sx={{
-                      p: 1,
-                      bgcolor: isMe ? '#e1f5fe' : 'white',
-                      borderRadius: 2,
-                      maxWidth: '70%',
-                      boxShadow: 1,
-                      wordBreak: 'break-word',
-                      whiteSpace: 'pre-wrap',
-                      textAlign: 'left'
-                    }}
+                  <Tooltip
+                    title={dayjs(m.createdAt).format('DD/MM/YYYY hh:mm A')}
+                    arrow
+                    enterDelay={500}
+                    leaveDelay={100}
                   >
-                    <Typography variant="body2">{m.text}</Typography>
-                  </Box>
+                    <Box
+                      sx={{
+                        p: 1,
+                        bgcolor: isMe ? '#e1f5fe' : 'white',
+                        borderRadius: 2,
+                        maxWidth: '70%',
+                        boxShadow: 1,
+                        wordBreak: 'break-word',
+                        whiteSpace: 'pre-wrap',
+                        textAlign: 'left',
+                        cursor: 'default' // để thấy rõ tooltip khi hover
+                      }}
+                    >
+                      <Typography variant="body2">{m.text}</Typography>
+                    </Box>
+                  </Tooltip>
+
                 </Box>
               )
             })
