@@ -43,7 +43,6 @@ function ForgetPasswordForm() {
         }
       )
       setSuccess(true)
-      // reset(undefined, { keepValues: true })
     } catch (error) {
       // error đã được toast xử lý rồi
     } finally {

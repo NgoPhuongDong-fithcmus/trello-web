@@ -7,31 +7,42 @@ import ChatIcon from '@mui/icons-material/Chat'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SendIcon from '@mui/icons-material/Send'
+import Badge from '@mui/material/Badge'
 import { useEffect } from 'react'
 import dayjs from 'dayjs'
 import { socketIoInstance } from '~/socketClient'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { useSelector } from 'react-redux'
 import { fetchMessagesAPI } from '~/apis'
+import IconMessage from '~/components/IconMessage/IconMessage'
+import IconTyping from '~/components/IconMessage/IconTypingMessage'
 
 function MessageUser({ boardId }) {
   const currentUser = useSelector(selectCurrentUser)
   const userId = currentUser?._id
+
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'Alice', text: 'Hello team!' },
-    { id: 2, sender: 'Bob', text: 'Hi Alice 👋' }
-  ])
+  const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
+  const [unread, setUnread] = useState(false)
+
+  const [typingUsers, setTypingUsers] = useState({})
+  const typingTimeout = useRef(null)
+
 
   const isOpenPopover = Boolean(anchorPopoverElement)
   const popoverId = isOpenPopover ? 'board-chat-popover' : undefined
 
+  // Đóng mở popover chat
   const handleTogglePopover = (event) => {
-    if (!anchorPopoverElement) setAnchorPopoverElement(event.currentTarget)
+    if (!anchorPopoverElement) {
+      setAnchorPopoverElement(event.currentTarget)
+      setUnread(false)
+    }
     else setAnchorPopoverElement(null)
   }
 
+  // Hàm gửi tin nhắn đã áp dụng realtime với socket.io
   const handleSendMessage = (e) => {
     e.preventDefault()
     if (!newMessage.trim()) return
@@ -45,13 +56,53 @@ function MessageUser({ boardId }) {
     setNewMessage('')
     socketIoInstance.emit('CLIENT_SEND_MESSAGE', { boardId, msg, userId })
   }
-  const chatEndRef = useRef(null)
 
+  // Hàm xử lý khi người dùng gõ tin nhắn realtime với socket.io
+  const handleTyping = (e) => {
+    setNewMessage(e.target.value)
+
+    socketIoInstance.emit('CLIENT_TYPING_MESSAGE', { boardId, userId: userId })
+
+    if (typingTimeout.current) clearTimeout(typingTimeout.current)
+    typingTimeout.current = setTimeout(() => {
+      socketIoInstance.emit('CLIENT_STOP_TYPING_MESSAGE', { boardId, userId: userId })
+    }, 2000)
+  }
+
+
+  useEffect(() => {
+    if (boardId) {
+      socketIoInstance.emit('JOIN_BOARD', boardId)
+    }
+  }, [boardId])
+
+  useEffect(() => {
+    socketIoInstance.on('SERVER_TYPING_MESSAGE', ({ userId }) => {
+      setTypingUsers((prev) => ({ ...prev, [userId]: true }))
+    })
+
+    socketIoInstance.on('SERVER_STOP_TYPING_MESSAGE', ({ userId }) => {
+      setTypingUsers((prev) => {
+        const updated = { ...prev }
+        delete updated[userId]
+        return updated
+      })
+    })
+
+    return () => {
+      socketIoInstance.off('SERVER_TYPING_MESSAGE')
+      socketIoInstance.off('SERVER_STOP_TYPING_MESSAGE')
+    }
+  }, [])
+  // End Hàm xử lý khi người dùng gõ tin nhắn realtime với socket.io
+
+  const chatEndRef = useRef(null)
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
+
 
   useEffect(() => {
     if (!isOpenPopover) return
@@ -63,11 +114,6 @@ function MessageUser({ boardId }) {
     fetchMessages()
   }, [isOpenPopover, boardId])
 
-  useEffect(() => {
-    if (boardId) {
-      socketIoInstance.emit('JOIN_BOARD', boardId)
-    }
-  }, [boardId])
 
   useEffect(() => {
     const handleNewMessage = (msg) => {
@@ -75,6 +121,7 @@ function MessageUser({ boardId }) {
         const filtered = prev.filter((m) => !(m.pending && m.text === msg.text))
         return [...filtered, msg]
       })
+      if (!isOpenPopover) setUnread(true)
     }
 
     socketIoInstance.on('SERVER_SEND_MESSAGE', handleNewMessage)
@@ -82,20 +129,32 @@ function MessageUser({ boardId }) {
     return () => {
       socketIoInstance.off('SERVER_SEND_MESSAGE', handleNewMessage)
     }
-  }, [])
+  }, [isOpenPopover])
 
   return (
     <Box>
       <Tooltip title="Chat together">
-        <Button
-          aria-describedby={popoverId}
-          onClick={handleTogglePopover}
-          variant="outlined"
-          startIcon={<ChatIcon />}
-          sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white' } }}
+        <Badge
+          color="error"
+          variant="dot"
+          invisible={!unread}
+          overlap="circular"
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right'
+          }}
         >
-          Chat
-        </Button>
+          <Button
+            aria-describedby={popoverId}
+            onClick={handleTogglePopover}
+            variant="outlined"
+            startIcon={<ChatIcon />}
+            sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white' } }}
+          >
+            Chat
+          </Button>
+        </Badge>
+
       </Tooltip>
 
       <Popover
@@ -103,21 +162,39 @@ function MessageUser({ boardId }) {
         open={isOpenPopover}
         anchorEl={anchorPopoverElement}
         onClose={handleTogglePopover}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: { width: 350, height: 400, display: 'flex', flexDirection: 'column' }
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
         }}
-        transitionDuration={0}
-        TransitionProps={{
-          onEntered: () => {
-            if (chatEndRef.current) {
-              chatEndRef.current.scrollIntoView({ behavior: 'auto' })
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+        PaperProps={{
+          sx: {
+            width: 350,
+            height: 400,
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            mt: 1.5,
+            borderRadius: 2,
+            boxShadow: 3,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -12,
+              left: 'calc(50% - 8px)',
+              width: 16,
+              height: 16,
+              bgcolor: '#7f8c8d',
+              transform: 'rotate(45deg)',
+              boxShadow: '-1px -1px 2px rgba(0,0,0,0.05)',
+              zIndex: 1
             }
           }
         }}
       >
-        {/* Danh sách tin nhắn */}
         <Box sx={{ flex: 1, p: 2, overflowY: 'auto', bgcolor: '#f5f5f5' }}>
           {messages.length === 0 ? (
             <Box
@@ -186,7 +263,7 @@ function MessageUser({ boardId }) {
                         wordBreak: 'break-word',
                         whiteSpace: 'pre-wrap',
                         textAlign: 'left',
-                        cursor: 'default' // để thấy rõ tooltip khi hover
+                        cursor: 'default'
                       }}
                     >
                       <Typography variant="body2">{m.text}</Typography>
@@ -197,11 +274,32 @@ function MessageUser({ boardId }) {
               )
             })
           )}
+          {Object.keys(typingUsers).length > 0 && (
+            <Box
+              sx={{
+                mb: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start'
+              }}
+            >
+              <Box
+                sx={{
+                  p: 1,
+                  bgcolor: 'white',
+                  borderRadius: 2,
+                  maxWidth: '50%',
+                  boxShadow: 1
+                }}
+              >
+                <IconTyping />
+              </Box>
+            </Box>
+          )}
+
           <div ref={chatEndRef} />
         </Box>
 
-
-        {/* Input gửi tin nhắn */}
         <Box
           component="form"
           onSubmit={handleSendMessage}
@@ -209,11 +307,12 @@ function MessageUser({ boardId }) {
         >
           <TextField
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleTyping}
             placeholder="Type a message..."
             size="small"
             fullWidth
           />
+          <IconMessage onSelectEmoji={(emoji) => setNewMessage((prev) => prev + emoji)} />
           <Button type="submit" color="primary" variant="contained" sx={{ ml: 1 }}>
             <SendIcon />
           </Button>

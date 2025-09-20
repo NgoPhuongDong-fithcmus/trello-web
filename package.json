@@ -28,6 +28,7 @@
     "axios": "^1.5.1",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.13",
+    "emoji-picker-react": "^4.13.2",
     "lodash": "^4.17.21",
     "material-ui-confirm": "^4.0.0",
     "moment": "^2.30.1",

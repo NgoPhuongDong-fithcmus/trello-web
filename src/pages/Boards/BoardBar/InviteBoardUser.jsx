@@ -41,15 +41,11 @@ function InviteBoardUser({ boardId }) {
   const submitInviteUserToBoard = (data) => {
     const { inviteeEmail } = data
 
-    // Gọi API để gửi lời mời người dùng vào board
     inviteUserAPI({ inviteeEmail, boardId }).then((invitation) => {
-      // Hiển thị thông báo thành công
       toast.success(`Invitation sent to ${inviteeEmail}!`, { theme: 'colored' })
-      // Clear thẻ input sử dụng react-hook-form bằng setValue
       setValue('inviteeEmail', null)
       setAnchorPopoverElement(null)
 
-      // Mời một người tham gia vào board thì cũng gửi/emit một sự kiện đến server (real-time)
       socketIoInstance.emit('CLIENT_USER_INVITED_TO_BOARD', invitation)
     })
 
@@ -70,7 +66,6 @@ function InviteBoardUser({ boardId }) {
         </Button>
       </Tooltip>
 
-      {/* Khi Click vào butotn Invite ở trên thì sẽ mở popover */}
       <Popover
         id={popoverId}
         open={isOpenPopover}

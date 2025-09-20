@@ -4,18 +4,12 @@ import PageLoading from '~/components/Loading/PageLoading'
 import { verifyUserResetPasswordAPI } from '~/apis'
 
 function AccountResetPasswordVerification() {
-  // Lấy giá trị email và token từ URL
   let [searchParams] = useSearchParams()
   const email = searchParams.get('email')
   const token = searchParams.get('token')
 
-  // console.log('email: ', email)
-  // console.log('token: ', token)
-
-  // tạo state để biết được là đã verify account hay chưa
   const [verified, setVerified] = useState(false)
 
-  // Gọi API để xác thực tài khoản
   useEffect(() => {
     if (email && token) {
       verifyUserResetPasswordAPI({ email, token }).then(() => {

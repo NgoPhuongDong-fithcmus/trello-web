@@ -32,23 +32,16 @@ function Notifications() {
   const dispatch = useDispatch()
   const notifications = useSelector(selectCurrentNotifications)
 
-  // Kiểm tra xem có thông báo mới hay không
   const [newNotifications, setNewNotifications] = useState(false)
 
   const currentUser = useSelector(selectCurrentUser)
-  // gọi API để lấy danh sách thông báo
   useEffect(() => {
     dispatch(fetchInvitationsAPI())
 
-    // Tạo function dể xử lí khi nhận được sự kiện real-time từ server
     const onReceiveNewInvitation = (invitation) => {
-      // Kiểm tra nếu người đang đăng nhập hiện tại mà lưu trong redux là người được mời (invitee)
       if (invitation.inviteeId === currentUser._id) {
-        // B1: Thêm bản ghi invitation mới vào danh sách thông báo ở redux
         dispatch(addNotification(invitation))
-        // B2: Cập nhật trạng thái newNotifications thành true
         setNewNotifications(true)
-        // B3: Hiển thị thông báo cho người dùng
         toast.info(`You have a new invitation from ${invitation.inviter.displayName} to join the ${invitation.board.title}`, {
           theme: 'colored',
           autoClose: 2000
@@ -58,9 +51,7 @@ function Notifications() {
 
     socketIoInstance.on('SERVER_USER_INVITED_TO_BOARD', onReceiveNewInvitation)
 
-    // Cleanup function để hủy lắng nghe sự kiện khi component unmount
     return () => {
-      // Hủy lắng nghe sự kiện khi component unmount
       socketIoInstance.off('SERVER_USER_INVITED_TO_BOARD', onReceiveNewInvitation)
     }
 
@@ -77,7 +68,6 @@ function Notifications() {
   }
 
   const updateBoardInvitation = (status, invitationId) => {
-    // Gọi API để cập nhật trạng thái lời mời
     dispatch(updateInvitationInBoardAPI({ invitationId, status }))
       .then((res) => {
         if (res.payload.boardInvitation.status === BOARD_INVITATION_STATUS.ACCEPTED) {
@@ -125,13 +115,11 @@ function Notifications() {
               overflowY: 'auto'
             }}>
               <Box sx={{ maxWidth: '100%', wordBreak: 'break-word', whiteSpace: 'pre-wrap', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {/* Nội dung của thông báo */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box><GroupAddIcon fontSize="small" /></Box>
                   <Box><strong>{notification?.inviter?.displayName}</strong> had invited you to join the board <strong>{notification?.board?.name}</strong></Box>
                 </Box>
 
-                {/* Khi Status của thông báo này là PENDING thì sẽ hiện 2 Button */}
                 {notification?.boardInvitation?.status ===BOARD_INVITATION_STATUS.PENDING &&
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>
                   <Button
@@ -156,7 +144,6 @@ function Notifications() {
                   </Button>
                 </Box>
                 }
-                {/* Khi Status của thông báo này là ACCEPTED hoặc REJECTED thì sẽ hiện thông tin đó lên */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>
                   {notification?.boardInvitation?.status === BOARD_INVITATION_STATUS.ACCEPTED && (
                     <Chip icon={<DoneIcon />} label="Accepted" color="success" size="small" />
@@ -167,7 +154,6 @@ function Notifications() {
                   )}
                 </Box>
 
-                {/* Thời gian của thông báo */}
                 <Box sx={{ textAlign: 'right' }}>
                   <Typography variant="span" sx={{ fontSize: '13px' }}>
                     {moment(notification?.createdAt).format('llll')}
@@ -175,7 +161,6 @@ function Notifications() {
                 </Box>
               </Box>
             </MenuItem>
-            {/* Cái đường kẻ Divider sẽ không cho hiện nếu là phần tử cuối */}
             {index !== ([...Array(6)].length - 1) && <Divider />}
           </Box>
         )}

@@ -19,13 +19,10 @@ function Require2FA({ user, handleSuccessRequire2FA }) {
       toast.error(errMsg)
       return
     }
-    // console.log('handleRequire2FA > otpToken: ', otpToken)
-    // Call API here
     verify2faAPI(user._id, otpToken)
       .then((updatedUser) => {
         toast.success('2FA verification successful!')
 
-        // close modal require 2FA
         handleSuccessRequire2FA(updatedUser)
       })
   }

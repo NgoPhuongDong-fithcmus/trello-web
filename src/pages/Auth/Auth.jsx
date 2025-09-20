@@ -9,7 +9,6 @@ import ResetPasswordForm from './ResetPasswordForm'
 
 function Auth() {
   const location = useLocation()
-  // console.log(location)
   const isLogin = location.pathname === '/login'
   const isRegister = location.pathname === '/register'
   const isForgotPassword = location.pathname === '/forgot-password'
